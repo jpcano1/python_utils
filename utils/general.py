@@ -143,15 +143,15 @@ def download_file_from_google_drive(id_, filename, dst="./data", size=None,
                     f.write(chunk)
             f.close()
 
-    URL = "https://docs.google.com/uc?export=download"
+    url = "https://docs.google.com/uc?export=download"
     session = requests.Session()    
 
-    response = session.get(URL, params={ 'id' : id_ }, stream=True)
+    response = session.get(url, params={ 'id' : id_ }, stream=True)
     token = get_confirm_token(response)
 
     if token:
         params = { 'id' : id_, 'confirm' : token }
-        response = session.get(URL, params=params, stream=True)
+        response = session.get(url, params=params, stream=True)
 
     save_response_content(response, filename, dst, size=size,
                           chnksz=chnksz)
