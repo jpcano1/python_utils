@@ -92,15 +92,18 @@ def visualize_subplot(imgs: list, titles: list,
 """
 Miscellaneous Functions
 """
-def download_content(url, filename, dst=None, chnksz=1000, zip=False):
+def download_content(url, filename, dst="./data", chnksz=1000, zip=False):
     try:
         r = requests.get(url, stream=True)
     except Exception as e:
         print("Error de conexión con el servidor")
         sys.exit()
         
-    with open(filename, "wb") as f:
-        
+    full_path = os.path.join(dst, filename)
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+
+    with open(full_path, "wb") as f:
         try:
             total = int(np.ceil(int(r.headers.get("content-length"))/chnksz))
         except:
@@ -117,7 +120,7 @@ def download_content(url, filename, dst=None, chnksz=1000, zip=False):
         extract_file(filename, dst)
     return
 
-def download_file_from_google_drive(id_, filename, dst=None, size=None,
+def download_file_from_google_drive(id_, filename, dst="./data", size=None,
                                     chnksz=1000, zip=False):
     """
     Retrieved and Improved from https://stackoverflow.com/a/39225039
@@ -128,9 +131,12 @@ def download_file_from_google_drive(id_, filename, dst=None, size=None,
                 return value
         return None
 
-    def save_response_content(response, filename, size=None,
+    def save_response_content(response, filename, dst, size=None,
                               chnksz=1000):
-        with open(filename, "wb") as f:
+        full_path = os.path.join(dst, filename)
+        if not os.path.exists(dst):
+            os.makedirs(dst)
+        with open(full_path, "wb") as f:
             gen = response.iter_content(chunk_size=chnksz)
             for chunk in tqdm(gen, total=size, unit="KB"):
                 if chunk: # filter out keep-alive new chunks
@@ -147,7 +153,7 @@ def download_file_from_google_drive(id_, filename, dst=None, size=None,
         params = { 'id' : id_, 'confirm' : token }
         response = session.get(URL, params=params, stream=True)
 
-    save_response_content(response, filename, size=size,
+    save_response_content(response, filename, dst, size=size,
                           chnksz=chnksz)
     response.close()
     if zip:
