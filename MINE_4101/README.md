@@ -10,5 +10,5 @@
 !shred -u setup_colab.py
 !wget "https://raw.githubusercontent.com/jpcano1/python_utils/main/MINE_4101/setup_colab.py" -O setup_colab.py
 import setup_colab as setup
-setup.setup_general()
+setup.setup_lab5()
 ```
