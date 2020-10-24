@@ -24,3 +24,14 @@ def setup_workshop_9(filename: str="kaggle.json", download_dataset=True):
         from utils import general as gen
         gen.extract_file("sign-language-mnist.zip", "data")
     print("Workshop 9 Enabled Successfully")
+
+def setup_workshop_12(download_dataset=True):
+    setup_general.setup_general()
+    torch_path = "ISIS_4825/ML/Taller_12/torch_utils.py"
+    setup_general.download_github_content(torch_path, "utils/torch_utils.py")
+    from utils import general as gen
+    if download_dataset:
+        train_id = "1rCxML5Z05kIcnqExLlyX3OSqklXThaM8"
+        test_id = "1--idHn6aiv3QHaQiV6MM0pVpNoEf7k4w"
+        gen.download_file_from_google_drive(train_id, "train_data.zip", size=209.1e3, zip=True)
+        gen.download_file_from_google_drive(test_id, "test_data.zip", size=11e3, zip=True)
