@@ -29,10 +29,11 @@ def setup_workshop_12(download_dataset=True):
     setup_general.setup_general()
     torch_path = "ISIS_4825/ML/Taller_12/torch_utils.py"
     setup_general.download_github_content(torch_path, "utils/torch_utils.py")
+    setup_general.download_github_content(torch_path, "utils/visualization_utils.py")
     from utils import general as gen
     if download_dataset:
-        train_id = "1qRwpSLj6POrJV7ZJFTPt0kswwrxtDA8b"
-        test_id = "1--mp95lbSA-EiElFIR_2xTbylsARsoM2"
-        gen.download_file_from_google_drive(train_id, "train_data.zip", size=209.1e3, zip=True)
-        gen.download_file_from_google_drive(test_id, "test_data.zip", size=11e3, zip=True)
+        train_id = "192V5FfehmbpN2wkl1apiygxSqW6EUmyP"
+        test_id = "1--hE7Ucvlsjf-fwET4-JMuS-VAva7Vxq"
+        gen.download_file_from_google_drive(train_id, "train_data.zip", size=202.4e3, zip=True)
+        gen.download_file_from_google_drive(test_id, "test_data.zip", size=21.7e3, zip=True)
     print("Workshop 12 Enabled Successfully")
