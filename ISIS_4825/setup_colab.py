@@ -28,8 +28,9 @@ def setup_workshop_9(filename: str="kaggle.json", download_dataset=True):
 def setup_workshop_12(download_dataset=True):
     setup_general.setup_general()
     torch_path = "ISIS_4825/ML/Taller_12/torch_utils.py"
+    vis_path = "ISIS_4825/ML/Taller_12/visualization_utils.py"
     setup_general.download_github_content(torch_path, "utils/torch_utils.py")
-    setup_general.download_github_content(torch_path, "utils/visualization_utils.py")
+    setup_general.download_github_content(vis_path, "utils/visualization_utils.py")
     from utils import general as gen
     if download_dataset:
         train_id = "192V5FfehmbpN2wkl1apiygxSqW6EUmyP"
