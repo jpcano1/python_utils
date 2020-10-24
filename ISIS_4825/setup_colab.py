@@ -33,5 +33,5 @@ def setup_workshop_12(download_dataset=True):
     if download_dataset:
         train_id = "1rCxML5Z05kIcnqExLlyX3OSqklXThaM8"
         test_id = "1--idHn6aiv3QHaQiV6MM0pVpNoEf7k4w"
-        gen.download_file_from_google_drive(train_id, "train_data.zip", size=209.1e3, zip=True)
-        gen.download_file_from_google_drive(test_id, "test_data.zip", size=11e3, zip=True)
+        gen.download_file_from_google_drive(train_id, "train_data.zip", dst=".", size=209.1e3, zip=True)
+        gen.download_file_from_google_drive(test_id, "test_data.zip", dst=".", size=11e3, zip=True)
