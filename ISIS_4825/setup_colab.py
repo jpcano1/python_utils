@@ -35,3 +35,4 @@ def setup_workshop_12(download_dataset=True):
         test_id = "1--mp95lbSA-EiElFIR_2xTbylsARsoM2"
         gen.download_file_from_google_drive(train_id, "train_data.zip", size=209.1e3, zip=True)
         gen.download_file_from_google_drive(test_id, "test_data.zip", size=11e3, zip=True)
+    print("Workshop 12 Enabled Successfully")
