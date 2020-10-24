@@ -1,4 +1,4 @@
-# MINE-4101
+# ISIS-4825
 ## Util Functions for Workshops
 ***
 - Open the notebook you wish to execute
@@ -13,4 +13,7 @@
 import setup_colab as setup
 # setup.setup_workshop_8()
 # setup.setup_workshop_9()
+# setup.setup_workshop_10()
+# setup.setup_workshop_11()
+# setup.setup_workshop_12()
 ```
