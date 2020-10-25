@@ -1,4 +1,5 @@
 from torch import nn
+from torch.nn import F
 
 """
 Autoencoder Creator
@@ -25,32 +26,46 @@ class Encoder(nn.Module):
         pool_size = kwargs.get("pool_size") or 2
         pool_stride = kwargs.get("pool_stride") or 2
 
+        jump = kwargs.get("jump") or 1
+
         init_layer = create_convolution_block(in_channels, init_filters)
         layers.append(init_layer)
 
         layer = kwargs.get("activation") or nn.LeakyReLU(0.2)
         layers.append(layer)
-        
-        layer = nn.MaxPool2d(kernel_size=pool_size, stride=pool_stride)
-        layers.append(layer)
 
-        i = 0
-        while i < depth-2:
-            layer = create_convolution_block(init_filters*2**i, 
-                                             init_filters*2**(i+1))
-            layers.append(layer)
-            layer = nn.LeakyReLU(0.2) or kwargs.get("activation")
-            layers.append(layer)
+        current_filters = init_filters
+        
+        for _ in range(depth - 1):
+            # Pooling Layer
+
+            for _ in range(jump - 1):
+                # Convolution Block
+                layer = create_convolution_block(current_filters,
+                                                 current_filters * 2)
+                layers.append(layer)
+
+                # Activation Block
+                layer = nn.LeakyReLU(0.2) or kwargs.get("activation")
+                layers.append(layer)
+
+                current_filters *= 2
+
+            # Pooling Block
             layer = nn.MaxPool2d(kernel_size=pool_size, stride=pool_stride)
             layers.append(layer)
-            i += 1
-        layer = create_convolution_block(init_filters*2**i, 
-                                        init_filters*2**(i+1))
-        layers.append(layer)
 
-        layer = kwargs.get("activation") or nn.LeakyReLU(0.2)
-        layers.append(layer)
-        
+            # Convolution Block
+            layer = create_convolution_block(current_filters, 
+                                             current_filters * 2)
+            layers.append(layer)
+
+            # Activation Block
+            layer = nn.LeakyReLU(0.2) or kwargs.get("activation")
+            layers.append(layer)
+
+            current_filters *= 2
+
         if kwargs.get("batch_normalization"):
             layer = nn.BatchNorm2d(init_filters*2**(i+1))
             layers.append(layer)
@@ -65,19 +80,36 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
         layers = []
 
-        i = 0
-        while i < depth - 1:
-            layer = get_upsample()
-            layers.append(layer)
-            layer = create_convolution_block(init_filters // 2**i, 
-                                                  init_filters // 2**(i+1))
-            layers.append(layer)
-            layer = nn.LeakyReLU(0.2) or kwargs.get("activation")
-            layers.append(layer)
-            i += 1
+        scale_factor = kwargs.get("scale_factor") or 2 
+        mode = kwargs.get("mode") or "bilinear"
 
-        layer = create_convolution_block(init_filters // 2**i, 
-                                              out_channels)
+        jump = kwargs.get("jump") or 1
+
+        current_filters = init_filters
+
+        for _ in range(depth - 1):    
+            for _ in range(jump - 1):
+                layer = create_convolution_block(current_filters,
+                                                 current_filters // 2)
+                layers.append(layer)
+
+                layer = kwargs.get("activation") or nn.LeakyReLU(0.2)
+                layers.append(layer)
+
+                current_filters //= 2
+
+            layer = get_upsample(scale_factor=scale_factor, mode=mode)
+            layers.append(layer)
+            layer = create_convolution_block(current_filters,
+                                             current_filters // 2)
+            layers.append(layer)
+            layer = kwargs.get("activation") or nn.LeakyReLU(0.2)
+            layers.append(layer)
+
+            current_filters //= 2
+
+        layer = create_convolution_block(current_filters, 
+                                         out_channels)
         layers.append(layer)
         layer = nn.Sigmoid()
         layers.append(layer)
@@ -90,10 +122,12 @@ class Autoencoder(nn.Module):
     def __init__(self, in_channels, out_channels, init_filters, depth, 
                  *args, **kwargs):
         super(Autoencoder, self).__init__()
+        jump = kwargs.get("jump") or 1
+
         self.encoder = Encoder(in_channels, init_filters, depth,
                                *args, **kwargs)
-        self.decoder = Decoder(init_filters * 2**(depth-1), out_channels,
-                               depth, *args, **kwargs)
+        self.decoder = Decoder(init_filters * 2**(jump * (depth-1)), 
+                               out_channels, depth, *args, **kwargs)
 
     def forward(self, x):
         x = self.encoder(x)
