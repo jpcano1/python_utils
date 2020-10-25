@@ -1,5 +1,4 @@
 from torch import nn
-from torch.nn import F
 
 """
 Autoencoder Creator
@@ -65,10 +64,6 @@ class Encoder(nn.Module):
             layers.append(layer)
 
             current_filters *= 2
-
-        if kwargs.get("batch_normalization"):
-            layer = nn.BatchNorm2d(init_filters*2**(i+1))
-            layers.append(layer)
 
         self.encoder = nn.Sequential(*layers)
 
