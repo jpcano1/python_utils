@@ -4,21 +4,6 @@ import numpy as np
 """
 Autoencoder Creator
 """
-def create_convolution_block(in_channels, out_channels, kernel_size=3, 
-                            stride=1, padding=1, padding_mode="zeros"):
-    x = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, 
-                kernel_size=kernel_size, stride=stride, 
-                padding_mode=padding_mode, padding=padding)
-    return x
-
-def get_upsample(scale_factor=2, mode="bilinear"):
-    if mode != "nearest":
-        x = nn.Upsample(scale_factor=scale_factor, mode=mode, 
-                    align_corners=True)
-    else:
-        x = nn.Upsample(scale_factor=scale_factor, mode=mode)
-    return x
-
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, *args, **kwargs):
         super(ConvBlock, self).__init__()
