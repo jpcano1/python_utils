@@ -1,4 +1,5 @@
 from torch import nn
+import torch
 
 """
 Autoencoder Creator
@@ -18,6 +19,33 @@ def get_upsample(scale_factor=2, mode="bilinear"):
         x = nn.Upsample(scale_factor=scale_factor, mode=mode)
     return x
 
+class Conv2dBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
+        kernel_size = kwargs.get("kernel_size") or 3
+        stride = kwargs.get("stride") or 1
+        padding = kwargs.get("padding") or 1
+        padding_mode = kwargs.get("padding_mode") or "zeros"
+        activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
+        bn = kwargs.get("bn") or 0
+
+        layers = []
+        conv2d_layer = nn.Conv2d(in_channels=in_channels, 
+                                out_channels=out_channels, 
+                                kernel_size=kernel_size, 
+                                stride=stride, 
+                                padding_mode=padding_mode, 
+                                padding=padding)
+        layers.append(conv2d_layer)
+        if torch.rand() < bn:
+            bn_layer = nn.BatchNorm2d(out_channels)
+            layers.append(bn_layer)
+
+        layers.append(activation)
+        self.conv_block = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.conv_block(x)
+        
 class Encoder(nn.Module):
     def __init__(self, in_channels, init_filters, depth, **kwargs):
         super(Encoder, self).__init__()
