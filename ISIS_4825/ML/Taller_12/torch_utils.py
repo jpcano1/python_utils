@@ -161,7 +161,6 @@ class UNet(nn.Module):
                  *args, **kwargs):
         super(UNet, self).__init__()
 
-
         assert depth > 1, f"{depth} must be greater than one"
         self.down_layers = []
         self.up_layers = []
