@@ -1,15 +1,16 @@
 from torch import nn
 import numpy as np
+import torch
 
 """
 Autoencoder Creator
 """
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, *args, **kwargs):
+    def __init__(self, in_channels, out_channels, padding=1, *args, **kwargs):
         super(ConvBlock, self).__init__()
         kernel_size = kwargs.get("kernel_size") or 3
         stride = kwargs.get("stride") or 1
-        padding = kwargs.get("padding") or 1
+
         padding_mode = kwargs.get("padding_mode") or "zeros"
         activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
         bn = kwargs.get("bn") or 0
@@ -44,6 +45,20 @@ class UpsampleBlock(nn.Module):
             
     def forward(self, x):
         return self.upsample_layer(x)
+
+class UpBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
+        super(UpBlock, self).__init__()
+        
+        activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
+        self.upsample = UpsampleBlock()
+        self.conv_layer = ConvBlock(in_channels, out_channels, 
+                                    activation=activation)
+
+    def forward(self, down_conv, last_conv):
+        last_conv = self.upsample(last_conv)
+        x = torch.cat((last_conv, down_conv), dim=1)
+        return self.conv_layer(x)
         
 class Encoder(nn.Module):
     def __init__(self, in_channels, init_filters, depth, **kwargs):
@@ -140,3 +155,53 @@ class Autoencoder(nn.Module):
     def forward(self, x):
         x = self.encoder(x)
         return self.decoder(x)
+
+class UNet(nn.Module):
+    def __init__(self, in_channels, out_channels, init_filters, depth, 
+                 *args, **kwargs):
+        super(UNet, self).__init__()
+
+
+        assert depth > 1, f"{depth} must be greater than one"
+        self.down_layers = []
+        self.up_layers = []
+
+        pool_size = kwargs.get("pool_size") or 2
+        pool_stride = kwargs.get("pool_stride") or 2
+
+        init_layer = ConvBlock(in_channels, init_filters)
+        self.down_layers.append(init_layer)
+
+        current_filters = init_filters
+
+        for _ in range(depth - 1):
+            layer = nn.MaxPool2d(kernel_size=pool_size, stride=pool_stride)
+            self.down_layers.append(layer)
+
+            layer = ConvBlock(current_filters,current_filters*2)
+            self.down_layers.append(layer)
+            current_filters *= 2
+
+        for _ in range(depth - 1):
+            layer = UpBlock(current_filters + current_filters // 2,
+                            current_filters // 2)
+            self.up_layers.append(layer)
+            current_filters //= 2
+
+        self.final_layer = ConvBlock(current_filters, out_channels, padding=0,
+                                     activation=nn.Sigmoid(), kernel_size=1)
+
+        self.down_layers = nn.ModuleList(self.down_layers)
+        self.up_layers = nn.ModuleList(self.up_layers)
+
+    def forward(self, x):
+        down_conv_layers = []
+
+        for layer in self.down_layers:
+            x = layer(x)
+            if isinstance(layer, ConvBlock):
+                down_conv_layers.append(x)
+        for idx, layer in enumerate(self.up_layers):
+            x = layer(down_conv_layers[-(idx+2)], x)
+
+        return self.final_layer(x)
