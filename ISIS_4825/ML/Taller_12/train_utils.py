@@ -13,6 +13,13 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-3):
     loss = 1 - IoU
     return loss.mean(), IoU.mean()
 
+def dice(y_pred, y_true, dim=(2, 3), eps=1e-5):
+    inter = (y_pred * y_true).sum(dim=dim) + eps
+    union = y_pred.sum(dim=dim) + y_true.sum(dim=dim) + eps
+    dice = 2 * inter / union
+    loss = 1 - dice
+    return loss.mean(), dice.mean()
+
 def loss_func(y_pred, y_true, metric=jaccard):
     bce = F.binary_cross_entropy(y_pred, y_true, 
                                  reduction="sum")
