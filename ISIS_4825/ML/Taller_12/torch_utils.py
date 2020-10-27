@@ -33,18 +33,41 @@ class UNet(nn.Module):
 
         pool_size = kwargs.get("pool_size") or 2
         pool_stride = kwargs.get("pool_stride") or 2
+        self.jump = kwargs.get("jump") or 1
 
         init_layer = ConvBlock(in_channels, init_filters)
         self.down_layers.append(init_layer)
 
         current_filters = init_filters
 
+        for j in range(self.jump - 1):
+            if j == self.jump - 2:
+                layer = ConvBlock(current_filters, current_filters * 2)
+                current_filters *= 2
+            else:
+                layer = ConvBlock(current_filters, current_filters)
+
+            self.down_layers.append(layer)
+
         for _ in range(depth - 1):
             layer = nn.MaxPool2d(kernel_size=pool_size, stride=pool_stride)
             self.down_layers.append(layer)
 
-            layer = ConvBlock(current_filters,current_filters*2)
+            if self.jump > 1:
+                layer = ConvBlock(current_filters, current_filters)
+            else:
+                layer = ConvBlock(current_filters, current_filters * 2)
+
             self.down_layers.append(layer)
+
+            for j in range(self.jump - 1):
+                if j == self.jump - 2:
+                    layer = ConvBlock(current_filters, current_filters * 2)
+                else:
+                    layer = ConvBlock(current_filters, current_filters)
+
+                self.down_layers.append(layer)
+
             current_filters *= 2
 
         for _ in range(depth - 1):
@@ -52,6 +75,10 @@ class UNet(nn.Module):
                             current_filters // 2)
             self.up_layers.append(layer)
             current_filters //= 2
+
+            for _ in range(self.jump - 1):
+                layer = ConvBlock(current_filters, current_filters)
+                self.up_layers.append(layer)
 
         self.final_layer = ConvBlock(current_filters, out_channels, padding=0,
                                      activation=nn.Sigmoid(), kernel_size=1)
@@ -62,11 +89,15 @@ class UNet(nn.Module):
     def forward(self, x):
         down_conv_layers = []
 
-        for layer in self.down_layers:
+        for idx, layer in enumerate(self.down_layers):
             x = layer(x)
             if isinstance(layer, ConvBlock):
                 down_conv_layers.append(x)
         for idx, layer in enumerate(self.up_layers):
-            x = layer(down_conv_layers[-(idx+2)], x)
-
+            if isinstance(layer, UpBlock):
+                idx_layer = -(idx + self.jump + 1)
+                x = layer(down_conv_layers[idx_layer], x)
+            else:
+                x = layer(x)
+            
         return self.final_layer(x)
