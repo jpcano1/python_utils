@@ -9,22 +9,23 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-3):
     inter = (y_pred * y_true).sum(dim=dim) + eps
     union = y_pred.sum(dim=dim) + y_true.sum(dim=dim) + eps
     union -= inter
-    IoU = inter/ union
-    loss = 1 - IoU
-    return loss.mean(), IoU.mean()
+    IoU = inter / union
+    return IoU.mean()
 
 def dice(y_pred, y_true, dim=(2, 3), eps=1e-5):
-    inter = (y_pred * y_true).sum(dim=dim) + eps
-    union = y_pred.sum(dim=dim) + y_true.sum(dim=dim) + eps
-    dice = 2 * inter / union
-    loss = 1 - dice
-    return loss.mean(), dice.mean()
+    numerator = 2 * (y_pred * y_true).sum(dim=dim) + eps
+    denominator = y_pred.sum(dim=dim) + y_true.sum(dim=dim) + eps
+    dice = numerator / denominator
+    dice = dice.mean()
 
-def loss_func(y_pred, y_true, metric=jaccard):
-    bce = F.binary_cross_entropy(y_pred, y_true, 
-                                 reduction="sum")
-    loss, acc = metric(y_pred, y_true)
-    loss += bce
+    soft_denominator = (y_pred ** 2).sum(dim=dim) + (y_true ** 2).sum(dim=dim) + eps
+    soft_dice = numerator / soft_denominator
+    soft_dice = 1 - soft_dice.mean()
+
+    return dice, soft_dice
+
+def loss_func(y_pred, y_true, metric=dice):
+    acc, loss = metric(y_pred, y_true)
 
     return loss, acc
 
@@ -54,6 +55,7 @@ def epoch_loss(model, criterion, dataloader, device, sanity_check=False, opt=Non
 
         if b_acc is not None:
             epoch_acc += b_acc
+            
         if sanity_check:
             break
 
@@ -81,7 +83,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     best_loss = kwargs.get("best_loss") or float("inf")
     best_acc = kwargs.get("best_acc") or float("inf")
 
-    for epoch in tqdm(range(epochs)):
+    for _ in tqdm(range(epochs)):
         current_lr = get_lr(opt)
 
         model.train()
