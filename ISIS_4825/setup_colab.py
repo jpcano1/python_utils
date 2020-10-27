@@ -37,8 +37,8 @@ def setup_workshop_12(download_dataset=True):
     setup_general.download_github_content(vis_path, "utils/visualization_utils.py")
     from utils import general as gen
     if download_dataset:
-        train_id = "192V5FfehmbpN2wkl1apiygxSqW6EUmyP"
-        test_id = "1--hE7Ucvlsjf-fwET4-JMuS-VAva7Vxq"
+        train_id = "1KZJp5jpyQgZg0Zeb8oLdldj74IVPAQjT"
+        test_id = "1--c0wrXFFEILWbYUsgM7zVplYk_RFcQO"
         gen.download_file_from_google_drive(train_id, "train_data.zip", size=202.4e3, zip=True)
         gen.download_file_from_google_drive(test_id, "test_data.zip", size=21.7e3, zip=True)
     print("Workshop 12 Enabled Successfully")
