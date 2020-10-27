@@ -1,5 +1,5 @@
 from torch import nn
-from layers import ConvBlock, UpBlock, Encoder, Decoder
+from .layers import ConvBlock, UpBlock, Encoder, Decoder
 
 """
 Autoencoder Creator
