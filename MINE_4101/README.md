@@ -11,5 +11,6 @@
 !wget -q "https://github.com/jpcano1/python_utils/raw/main/setup_colab_general.py" -O setup_colab_general.py
 !wget -q "https://github.com/jpcano1/python_utils/raw/main/MINE_4101/setup_colab.py" -O setup_colab.py
 import setup_colab as setup
-setup.setup_lab5()
+# setup.setup_lab5()
+# setup.setup_project()
 ```
