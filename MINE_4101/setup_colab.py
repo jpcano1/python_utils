@@ -1,5 +1,7 @@
 import setup_colab_general as setup_general
 import os
+from google.colab import files
+from IPython.display import clear_output
 
 def setup_kaggle_token(filename: str):
     assert filename.endswith(".json"), "El archivo no es JSON"
