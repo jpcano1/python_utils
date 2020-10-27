@@ -29,7 +29,11 @@ def setup_workshop_12(download_dataset=True):
     setup_general.setup_general()
     torch_path = "ISIS_4825/ML/Taller_12/torch_utils.py"
     vis_path = "ISIS_4825/ML/Taller_12/visualization_utils.py"
+    layers_path = "ISIS_4825/ML/Taller_12/layers.py"
+    train_path = "ISIS_4825/ML/Taller_12/train_utils.py"
     setup_general.download_github_content(torch_path, "utils/torch_utils.py")
+    setup_general.download_github_content(layers_path, "utils/layers.py")
+    setup_general.download_github_content(train_path, "utils/train_utils.py")
     setup_general.download_github_content(vis_path, "utils/visualization_utils.py")
     from utils import general as gen
     if download_dataset:
