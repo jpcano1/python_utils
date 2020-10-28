@@ -21,7 +21,7 @@ class ConvBlock(nn.Module):
                                 padding_mode=padding_mode, 
                                 padding=padding)
         layers.append(conv2d_layer)
-        if np.random.rand() < bn:
+        if bn == 1:
             bn_layer = nn.BatchNorm2d(out_channels)
             layers.append(bn_layer)
 
