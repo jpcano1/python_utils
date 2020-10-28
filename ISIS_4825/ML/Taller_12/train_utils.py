@@ -9,16 +9,9 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
     inter = torch.sum(y_true * y_pred, dim=dim)
     union = torch.sum(y_pred, dim=dim) + torch.sum(y_true, dim=dim)
     union -= inter
-    IoU = ((inter + eps) / (union + eps)).sum()
+    IoU = ((inter + eps) / (union + eps)).mean()
     loss = 1 - IoU
     return loss, IoU
-
-def dice(y_pred, y_true, dim=(2, 3), eps=1e-5):
-    num = 2 * torch.sum(y_pred * y_true, dim=dim) + eps
-    den = torch.sum(y_pred + y_true, dim=dim) + eps
-    dice = (num / den).sum()
-    loss = 1 - dice
-    return loss, dice
 
 def loss_func(y_pred, y_true, metric=jaccard):
     loss, acc = metric(y_pred, y_true)
@@ -37,7 +30,7 @@ def batch_loss(criterion, y_pred, y_true, opt=None):
 def epoch_loss(model, criterion, dataloader, device, sanity_check=False, opt=None):
     epoch_loss = 0.
     epoch_acc = 0.
-    len_data = len(dataloader.dataset)
+    len_data = len(dataloader)
 
     for X_batch, y_batch in tqdm(dataloader):
         X_batch = X_batch.to(device)
