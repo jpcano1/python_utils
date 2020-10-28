@@ -11,7 +11,7 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-3):
     union -= inter
     IoU = inter / union
     loss = 1 - IoU
-    return loss.mean(), IoU
+    return loss.mean(), IoU.mean()
 
 def loss_func(y_pred, y_true, metric=jaccard):
     loss, acc = metric(y_pred, y_true)
