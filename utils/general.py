@@ -160,3 +160,12 @@ def download_file_from_google_drive(id_, filename, dst="./data", size=None,
     if zip:
         extract_file(full_path, dst)
     return
+
+"""
+Data Scalers
+"""
+def scale(img, min, max, dtype="uint8"):
+    img_min = img.min()
+    img_max = img.max()
+    m = (max - min) / (img_max - img_min)
+    return (m * (img - img_min) + min).astype(dtype)
