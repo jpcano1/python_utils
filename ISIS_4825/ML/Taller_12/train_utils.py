@@ -6,19 +6,19 @@ import torch
 from tqdm.auto import tqdm
 
 def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
-    inter = (y_pred * y_true).sum(dim=dim)
-    union = y_pred.sum(dim=dim) + y_true.sum(dim=dim)
+    inter = torch.sum(y_pred * y_true, dim=dim)
+    union = torch.sum(y_pred + y_true, dim=dim)
     union -= inter
-    IoU = (inter + eps) / (union + eps)
-    loss = 1. - IoU
-    return loss.mean(), IoU.mean()
+    IoU = (inter / (union + eps)).mean()
+    loss = 1 - IoU
+    return loss, IoU
 
 def dice(y_pred, y_true, dim=(2, 3), eps=1e-5):
-    num = (y_pred * y_true).sum(dim=dim)
-    den = y_pred.sum(dim=dim) + y_true.sum(dim=dim)
-    dice = 2. * (num + eps) / (den + eps)
-    loss = 1. - dice
-    return loss.mean(), dice.mean()
+    num = torch.sum(y_pred * y_true, dim=dim)
+    den = torch.sum(y_pred + y_true, dim=dim)
+    dice = (2. * num / (den + eps)).mean()
+    loss = 1 - dice
+    return loss, dice
 
 def loss_func(y_pred, y_true, metric=dice):
     loss, acc = metric(y_pred, y_true)
