@@ -10,23 +10,11 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-3):
     union = y_pred.sum(dim=dim) + y_true.sum(dim=dim) + eps
     union -= inter
     IoU = inter / union
-    return IoU.mean()
+    loss = 1 - IoU
+    return loss.mean(), IoU
 
-def dice(y_pred, y_true, dim=(2, 3), eps=1e-5):
-    numerator = 2 * (y_pred * y_true).sum(dim=dim) + eps
-    denominator = y_pred.sum(dim=dim) + y_true.sum(dim=dim) + eps
-    dice = numerator / denominator
-    dice = dice.mean()
-
-    soft_denominator = (y_pred ** 2).sum(dim=dim) + (y_true ** 2).sum(dim=dim) + eps
-    soft_dice = numerator / soft_denominator
-    soft_dice = 1 - soft_dice.mean()
-
-    return dice, soft_dice
-
-def loss_func(y_pred, y_true, metric=dice):
-    acc, loss = metric(y_pred, y_true)
-
+def loss_func(y_pred, y_true, metric=jaccard):
+    loss, acc = metric(y_pred, y_true)
     return loss, acc
 
 def batch_loss(criterion, y_pred, y_true, opt=None):
