@@ -20,7 +20,7 @@ def dice(y_pred, y_true, dim=(2, 3), eps=1e-5):
     loss = 1 - dice
     return loss, dice
 
-def loss_func(y_pred, y_true, metric=dice):
+def loss_func(y_pred, y_true, metric=jaccard):
     loss, acc = metric(y_pred, y_true)
     return loss, acc
 
