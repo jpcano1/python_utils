@@ -117,7 +117,7 @@ def download_content(url, filename, dst="./data", chnksz=1000, zip=False):
         r.close()
     
     if zip:
-        extract_file(filename, dst)
+        extract_file(full_path, dst)
     return
 
 def download_file_from_google_drive(id_, filename, dst="./data", size=None,
