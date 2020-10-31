@@ -33,7 +33,10 @@ def setup_workshop_10(filename: str="kaggle.json",
     setup_kaggle_token(filename)
     os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
-        pass
+        os.system("kaggle datasets download -d andrewmvd/medical-mnist")
+        from utils import general as gen
+        gen.extract_file("medical-mnist.zip", "data")
+        print("Dataset Downloaded Successfully")
     print("Workshop 10 Enabled Successfully")
 
 def setup_workshop_12(download_dataset=True, pretrained=True):
