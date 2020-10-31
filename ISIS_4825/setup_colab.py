@@ -15,15 +15,26 @@ def setup_workshop_8():
     setup_general.setup_general()
     print("Workshop 8 Enabled Successfully")
 
-def setup_workshop_9(filename: str="kaggle.json", download_dataset=True):
+def setup_workshop_9(filename: str="kaggle.json", 
+                    download_dataset=True, kaggle_version="1.5.6"):
     setup_general.setup_general()
     setup_kaggle_token(filename)
-    os.system("pip install -q kaggle==1.5.6")
+    os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
         os.system("kaggle datasets download -d datamunge/sign-language-mnist")
         from utils import general as gen
         gen.extract_file("sign-language-mnist.zip", "data")
+        print("Dataset Downloaded Successfully")
     print("Workshop 9 Enabled Successfully")
+
+def setup_workshop_10(filename: str="kaggle.json", 
+                    download_dataset=True, kaggle_version="1.5.6"):
+    setup_general.setup_general()
+    setup_kaggle_token(filename)
+    os.system(f"pip install -q kaggle=={kaggle_version}")
+    if download_dataset:
+        pass
+    print("Workshop 10 Enabled Successfully")
 
 def setup_workshop_12(download_dataset=True, pretrained=True):
     setup_general.setup_general()
