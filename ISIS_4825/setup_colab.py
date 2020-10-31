@@ -57,6 +57,9 @@ def setup_workshop_12(download_dataset=True, pretrained=True):
         gen.download_file_from_google_drive(test_id, "test_data.zip", size=22e3, zip=True)
     if pretrained:
         autoencoder_id = "1e0N4VKKKQNIQ-nhFSiTjzhfSXiDiYYLs"
+        unet_id = "1Np_5_sd-TpvSROgPSnTQQEzyHTYGQZY6"
         gen.download_file_from_google_drive(autoencoder_id, "autoencoder.pt",
-                                            dst="./models", size=40e3)
+                                            dst="./models", size=49e3)
+        gen.download_file_from_google_drive(unet_id, "unet.pt",
+                                            dst="./models", size=22e3)
     print("Workshop 12 Enabled Successfully")
