@@ -37,12 +37,13 @@ class UNet(nn.Module):
 
         init_layer = ConvBlock(in_channels, init_filters)
         self.down_layers.append(init_layer)
+        bn = kwargs.get("bn") or 0
 
         current_filters = init_filters
 
         for j in range(self.jump - 1):
             if j == self.jump - 2:
-                layer = ConvBlock(current_filters, current_filters * 2)
+                layer = ConvBlock(current_filters, current_filters * 2, bn=bn)
                 current_filters *= 2
             else:
                 layer = ConvBlock(current_filters, current_filters)
@@ -54,15 +55,15 @@ class UNet(nn.Module):
             self.down_layers.append(layer)
 
             if self.jump > 1:
-                layer = ConvBlock(current_filters, current_filters)
+                layer = ConvBlock(current_filters, current_filters, bn=bn)
             else:
-                layer = ConvBlock(current_filters, current_filters * 2)
+                layer = ConvBlock(current_filters, current_filters * 2, bn=bn)
 
             self.down_layers.append(layer)
 
             for j in range(self.jump - 1):
                 if j == self.jump - 2:
-                    layer = ConvBlock(current_filters, current_filters * 2)
+                    layer = ConvBlock(current_filters, current_filters * 2, bn=bn)
                 else:
                     layer = ConvBlock(current_filters, current_filters)
 
@@ -77,11 +78,11 @@ class UNet(nn.Module):
             current_filters //= 2
 
             for _ in range(self.jump - 1):
-                layer = ConvBlock(current_filters, current_filters)
+                layer = ConvBlock(current_filters, current_filters, bn=bn)
                 self.up_layers.append(layer)
 
         self.final_layer = ConvBlock(current_filters, out_channels, padding=0,
-                                     activation=nn.Sigmoid(), kernel_size=1)
+                                     activation=nn.Sigmoid(), kernel_size=1, bn=bn)
 
         self.down_layers = nn.ModuleList(self.down_layers)
         self.up_layers = nn.ModuleList(self.up_layers)
