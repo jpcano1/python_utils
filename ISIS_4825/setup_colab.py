@@ -45,7 +45,10 @@ def setup_workshop_12(filename: str="kaggle.json", pretrained=True,
     setup_kaggle_token(filename)
     os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
-        pass
+        os.system("kaggle datasets download -d paultimothymooney/chest-xray-pneumonia")
+        from utils import general as gen
+        gen.extract_file("chest-xray-pneumonia.zip", "data")
+        print("Dataset Downloaded Successfully")
     if pretrained:
         pass
     print("Workshop 12 Enabled Successfully")
