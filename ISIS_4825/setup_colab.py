@@ -39,6 +39,17 @@ def setup_workshop_10(filename: str="kaggle.json",
         print("Dataset Downloaded Successfully")
     print("Workshop 10 Enabled Successfully")
 
+def setup_workshop_12(filename: str="kaggle.json", pretrained=True,
+                      download_dataset=True, kaggle_version="1.5.6"):
+    setup_general.setup_general()
+    setup_kaggle_token(filename)
+    os.system(f"pip install -q kaggle=={kaggle_version}")
+    if download_dataset:
+        pass
+    if pretrained:
+        pass
+    print("Workshop 12 Enabled Successfully")
+
 def setup_workshop_13(download_dataset=True, pretrained=True):
     setup_general.setup_general()
     os.system("pip install -q albumentations==0.5.0")
