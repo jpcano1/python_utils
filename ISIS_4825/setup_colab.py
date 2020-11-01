@@ -39,13 +39,13 @@ def setup_workshop_10(filename: str="kaggle.json",
         print("Dataset Downloaded Successfully")
     print("Workshop 10 Enabled Successfully")
 
-def setup_workshop_12(download_dataset=True, pretrained=True):
+def setup_workshop_13(download_dataset=True, pretrained=True):
     setup_general.setup_general()
     os.system("pip install -q albumentations==0.5.0")
-    torch_path = "ISIS_4825/ML/Taller_12/torch_utils.py"
-    vis_path = "ISIS_4825/ML/Taller_12/visualization_utils.py"
-    layers_path = "ISIS_4825/ML/Taller_12/layers.py"
-    train_path = "ISIS_4825/ML/Taller_12/train_utils.py"
+    torch_path = "ISIS_4825/ML/Taller_13/torch_utils.py"
+    vis_path = "ISIS_4825/ML/Taller_13/visualization_utils.py"
+    layers_path = "ISIS_4825/ML/Taller_13/layers.py"
+    train_path = "ISIS_4825/ML/Taller_13/train_utils.py"
     setup_general.download_github_content(torch_path, "utils/torch_utils.py")
     setup_general.download_github_content(layers_path, "utils/layers.py")
     setup_general.download_github_content(train_path, "utils/train_utils.py")
@@ -66,4 +66,4 @@ def setup_workshop_12(download_dataset=True, pretrained=True):
         gen.download_file_from_google_drive(unet_id, "unet.pt",
                                             dst="./models", size=22e3)
         print("Pretrained Networks Downloaded Successfully")
-    print("Workshop 12 Enabled Successfully")
+    print("Workshop 13 Enabled Successfully")
