@@ -27,15 +27,12 @@ def setup_workshop_9(filename: str="kaggle.json",
         print("Dataset Downloaded Successfully")
     print("Workshop 9 Enabled Successfully")
 
-def setup_workshop_10(filename: str="kaggle.json", 
-                    download_dataset=True, kaggle_version="1.5.6"):
+def setup_workshop_10(download_dataset=True):
     setup_general.setup_general()
-    setup_kaggle_token(filename)
-    os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
-        os.system("kaggle datasets download -d andrewmvd/medical-mnist")
         from utils import general as gen
-        gen.extract_file("medical-mnist.zip", "data")
+        data_url = "http://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
+        gen.download_content(data_url, "data.tar.gz")
         print("Dataset Downloaded Successfully")
     print("Workshop 10 Enabled Successfully")
 

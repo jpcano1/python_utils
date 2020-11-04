@@ -106,7 +106,7 @@ def visualize_subplot(imgs: list, titles: list,
 """
 Miscellaneous Functions
 """
-def download_content(url, filename, dst="./data", chnksz=1000, zip=False):
+def download_content(url, filename, dst="./data", chnksz=1000):
     try:
         r = requests.get(url, stream=True)
     except Exception as e:
