@@ -31,15 +31,15 @@ def read_listdir(dir_):
 def extract_file(filename: str, dst=None):
     if filename.endswith(".zip"):
         with zipfile.ZipFile(filename) as zfile:
-            print("\nExtrayendo Zip File...")
+            print("\nExtracting Zip File...")
             zfile.extractall(dst)
             zfile.close()
     elif ".tar" in filename:
         with tarfile.open(filename, "r") as tfile:
-            print("\nExtrayendo Tar File...")
+            print("\nExtracting Tar File...")
             tfile.extractall(dst)
             tfile.close()
-    print("Eliminando Zip File...")
+    print("Deleting File...")
     os.remove(filename)
 
 def unpickle(filename):
