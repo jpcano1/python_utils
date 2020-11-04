@@ -6,6 +6,8 @@ import zipfile
 import os
 import matplotlib.pyplot as plt
 import zipfile
+import tarfile
+import pickle
 
 """
 OS Functions
@@ -26,13 +28,25 @@ def read_listdir(dir_):
         full_dirs.append(full_dir)
     return np.sort(full_dirs)
 
-def extract_file(filename, dst=None):
-    with zipfile.ZipFile(filename) as zfile:
-        print("\nExtrayendo Zip File...")
-        zfile.extractall(dst)
-        print("Eliminando Zip File...")
-        os.remove(filename)
-    return
+def extract_file(filename: str, dst=None):
+    if filename.endswith(".zip"):
+        with zipfile.ZipFile(filename) as zfile:
+            print("\nExtrayendo Zip File...")
+            zfile.extractall(dst)
+            zfile.close()
+    elif ".tar" in filename:
+        with tarfile.open(filename, "r") as tfile:
+            print("\nExtrayendo Tar File...")
+            tfile.extractall(dst)
+            tfile.close()
+    print("Eliminando Zip File...")
+    os.remove(filename)
+
+def unpickle(filename):
+    with open(filename, "rb") as fo:
+        pickle_data = pickle.load(fo, encoding='bytes')
+        fo.close()
+    return pickle_data
 
 """
 DataViz Functions
@@ -116,9 +130,7 @@ def download_content(url, filename, dst="./data", chnksz=1000, zip=False):
         f.close()
         r.close()
     
-    if zip:
-        extract_file(full_path, dst)
-    return
+    extract_file(full_path, dst)
 
 def download_file_from_google_drive(id_, filename, dst="./data", size=None,
                                     chnksz=1000, zip=False):
