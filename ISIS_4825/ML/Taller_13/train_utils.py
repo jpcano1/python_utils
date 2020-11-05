@@ -69,7 +69,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
 
     best_model = copy.deepcopy(model.state_dict())
     best_loss = kwargs.get("best_loss") or float("inf")
-    best_acc = kwargs.get("best_acc") or float("inf")
+    best_acc = kwargs.get("best_acc") or 0
 
     for _ in tqdm(range(epochs)):
         current_lr = get_lr(opt)
