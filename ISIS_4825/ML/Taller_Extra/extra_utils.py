@@ -1,6 +1,6 @@
 import numpy as np
 import os
-import .general as gen
+from . import general as gen
 from tensorflow import keras
 
 def get_vol_slice(vol, lab, idx):
