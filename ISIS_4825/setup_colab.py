@@ -81,6 +81,8 @@ def setup_workshop_13(download_dataset=True, pretrained=True):
 
 def setup_extra_workshop(download_dataset=True):
     setup_general.setup_general()
+    extra_utils_path = "ISIS_4825/ML/Taller_Extra/extra_utils.py"
+    setup_general.download_github_content(extra_utils_path, "utils/extra_utils.py")
     if download_dataset:
         from utils import general as gen
         id_data = "0B0vscETPGI1-TE5KWFgxaURubFE"

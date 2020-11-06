@@ -3,7 +3,7 @@ import os
 import .general as gen
 from tensorflow import keras
 
-def get_slice(vol, lab, idx):
+def get_vol_slice(vol, lab, idx):
     vol_slice = vol[..., idx]
     lab_slice = lab[..., idx]
     vol_slice = np.rot90(vol_slice, 1)
