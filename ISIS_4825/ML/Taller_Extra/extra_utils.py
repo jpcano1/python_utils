@@ -2,6 +2,8 @@ import numpy as np
 import os
 from . import general as gen
 from tensorflow import keras
+from tqdm.auto import tqdm
+import cv2
 
 def get_vol_slice(vol, lab, idx):
     vol_slice = vol[..., idx]
@@ -12,7 +14,7 @@ def get_vol_slice(vol, lab, idx):
     vol_slice = gen.scale(vol_slice, 0, 255)
     return vol_slice, lab_slice
 
-def save_to_dir(X, index_name, y=None, data_folder="/content/train_data"):
+def save_to_dir(X, y, index_name, data_folder="/content/train_data"):
     if not os.path.exists(data_folder):
         os.makedirs(data_folder, exist_ok=True)
     X_data_folder = os.path.join(data_folder, "data")
@@ -53,3 +55,33 @@ def get_slice(X, y, num_classes=3, bg_thresh=0.98):
         return X, y.astype("uint8")
 
     return None
+
+def create_data(dataset, bg_thresh=0.97, save_dir="/content/train_data", 
+                sanity_check=False, test=False):
+
+    total_slices = 0
+
+    for vol, lab in tqdm(dataset):
+        print("Volumen Cargado")
+        for i_slice in tqdm(range(vol.shape[-1])):
+            X, y = get_vol_slice(vol, lab, i_slice)
+            slice_ = get_slice(X, y, bg_thresh=bg_thresh)
+
+            if slice_:
+                X = slice_[0]
+                X = cv2.resize(X, (224, 224), cv2.INTER_NEAREST)
+                
+                if not test:
+                    y = slice_[1]
+                    y = cv2.resize(y, (224, 224), cv2.INTER_NEAREST)
+
+                    save_to_dir(X, y, total_slices, data_folder=save_dir)
+                else:
+                    save_to_dir(X, None, total_slices, data_folder=save_dir)
+                
+                total_slices += 1
+
+                if sanity_check:
+                    break
+        if sanity_check:
+            break
