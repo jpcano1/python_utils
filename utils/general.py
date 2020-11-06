@@ -133,7 +133,7 @@ def download_content(url, filename, dst="./data", chnksz=1000):
     extract_file(full_path, dst)
 
 def download_file_from_google_drive(id_, filename, dst="./data", size=None,
-                                    chnksz=1000, zip=False):
+                                    chnksz=1000):
     """
     Retrieved and Improved from https://stackoverflow.com/a/39225039
     """
@@ -156,7 +156,7 @@ def download_file_from_google_drive(id_, filename, dst="./data", size=None,
             f.close()
 
     url = "https://docs.google.com/uc?export=download"
-    session = requests.Session()    
+    session = requests.Session()
 
     response = session.get(url, params={ 'id' : id_ }, stream=True)
     token = get_confirm_token(response)
@@ -169,8 +169,8 @@ def download_file_from_google_drive(id_, filename, dst="./data", size=None,
                           chnksz=chnksz)
     response.close()
     full_path = os.path.join(dst, filename)
-    if zip:
-        extract_file(full_path, dst)
+
+    extract_file(full_path, dst)
     return
 
 """
