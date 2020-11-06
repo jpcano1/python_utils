@@ -84,6 +84,6 @@ def setup_extra_workshop(download_dataset=True):
     if download_dataset:
         from utils import general as gen
         id_data = "0B0vscETPGI1-TE5KWFgxaURubFE"
-        gen.download_file_from_google_drive(id_data, "kits.zip", size=4.27e6, zip=True)
+        gen.download_file_from_google_drive(id_data, "kits.zip", size=4.27e6)
         print("Dataset Downloaded")
     print("Extra Workshop Enabled Successfully")
