@@ -78,3 +78,12 @@ def setup_workshop_13(download_dataset=True, pretrained=True):
                                             dst="./models", size=22e3)
         print("Pretrained Networks Downloaded Successfully")
     print("Workshop 13 Enabled Successfully")
+
+def setup_extra_workshop(download_dataset=True):
+    setup_general.setup_general()
+    if download_dataset:
+        from utils import general as gen
+        id_data = "0B0vscETPGI1-TE5KWFgxaURubFE"
+        gen.download_file_from_google_drive(id_data, "kits.zip", size=4.27e6, zip=True)
+        print("Dataset Downloaded")
+    print("Extra Workshop Enabled Successfully")
