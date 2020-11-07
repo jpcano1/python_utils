@@ -78,7 +78,6 @@ def create_data(dataset, bg_thresh=0.97, save_dir="/content/train_data",
                     save_to_dir(X, y, total_slices, data_folder=save_dir)
                 else:
                     save_to_dir(X, None, total_slices, data_folder=save_dir)
-                
                 total_slices += 1
 
                 if sanity_check:
