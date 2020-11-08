@@ -21,4 +21,4 @@ def setup_project(filename="kaggle.json", download_dataset=True,
         from utils import general as gen
         gen.extract_file("alzheimers-dataset-4-class-of-images.zip", "data")
         print("Dataset Downloaded Successfully")
-    print("Workshop 9 Enabled Successfully")
+    print("Workshop Project Enabled Successfully")
