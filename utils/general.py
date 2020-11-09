@@ -34,13 +34,15 @@ def extract_file(filename: str, dst=None):
             print("\nExtracting Zip File...")
             zfile.extractall(dst)
             zfile.close()
+        print("Deleting File...")
+        os.remove(filename)
     elif ".tar" in filename:
         with tarfile.open(filename, "r") as tfile:
             print("\nExtracting Tar File...")
             tfile.extractall(dst)
             tfile.close()
-    print("Deleting File...")
-    os.remove(filename)
+        print("Deleting File...")
+        os.remove(filename)
 
 def unpickle(filename):
     with open(filename, "rb") as fo:
