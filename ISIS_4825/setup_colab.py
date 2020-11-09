@@ -42,9 +42,9 @@ def setup_workshop_12(filename: str="kaggle.json", pretrained=True,
     setup_kaggle_token(filename)
     os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
-        os.system("kaggle datasets download -d paultimothymooney/chest-xray-pneumonia")
+        os.system("kaggle datasets download -d sovitrath/diabetic-retinopathy-2015-data-colored-resized")
         from utils import general as gen
-        gen.extract_file("chest-xray-pneumonia.zip", "data")
+        gen.extract_file("diabetic-retinopathy-2015-data-colored-resized.zip", "data")
         print("Dataset Downloaded Successfully")
     if pretrained:
         pass
