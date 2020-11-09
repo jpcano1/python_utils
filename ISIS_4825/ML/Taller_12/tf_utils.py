@@ -1,20 +1,34 @@
 from tensorflow import keras
 from tensorflow.keras import backend as K
+import numpy as np
 
-class ModelSaveCallback(keras.callbacks.Callback):
-    def __init__(self, filename):
-        super(ModelSaveCallback, self).__init__()
-        self.filename = filename
+class CustomCallback(keras.callbacks.Callback):
+    def __init__(self, weights_dir, patience=10, rate=0.5):
+        super(CustomCallback, self).__init__()
+        self.weights_dir = weights_dir
+        self.rate = rate
+        self.patience = patience
 
+    def on_train_begin(self, logs=None):
+        self.best_loss = np.Inf
+        self.best_recall = 0
+        self.wait = 0
+    
     def on_epoch_end(self, epoch, logs=None):
-        model_filename=self.filename.format(epoch)
-        keras.models.save_model(self.model, model_filename)
-        print(f"\nModel saved in {model_filename}")
-
-class LRHistory(keras.callbacks.Callback):
-    def __init_(self, model):
-        super(LRHistory, self).__init__()
-        self.model = model
-
-    def on_epoch_begin(self, epoch, logs={}):
-        print(f"Learning Rate: {K.get_value(self.model.optimizer.lr)}")
+        current_loss = logs.get("val_loss")
+        current_recall = logs.get("val_Recall")
+        if (current_loss < self.best_loss or 
+            current_recall > self.best_recall):
+            self.wait = 0
+            self.best_loss = current_loss
+            self.best_recall = current_recall
+            self.model.save_weights(self.weights_dir)
+            print("\nBest Weights Saved!!")
+        else:
+            self.wait += 1
+            if self.wait >= self.patience:
+                print(f"\nEpoch {epoch}, Reducing Learning Rate")
+                lr = K.get_value(self.model.optimizer.lr)
+                new_lr = lr * self.rate
+                K.set_value(self.model.optimizer.lr, new_lr)
+                print(f"\nLearning Rate Reduced: {new_lr}")
