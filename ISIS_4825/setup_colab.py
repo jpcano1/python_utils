@@ -36,15 +36,14 @@ def setup_workshop_10(download_dataset=True):
         print("Dataset Downloaded Successfully")
     print("Workshop 10 Enabled Successfully")
 
-def setup_workshop_12(filename: str="kaggle.json", pretrained=True,
-                      download_dataset=True, kaggle_version="1.5.6"):
+def setup_workshop_12(pretrained=True, download_dataset=True):
     setup_general.setup_general()
-    setup_kaggle_token(filename)
-    os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
-        os.system("kaggle datasets download -d sovitrath/diabetic-retinopathy-2015-data-colored-resized")
+        data_id = "1xnK3B6K6KekDI55vwJ0vnc2IGoDga9cj"
+        labels_url = "https://github.com/AlexOlsen/DeepWeeds/raw/master/labels/labels.csv"
         from utils import general as gen
-        gen.extract_file("diabetic-retinopathy-2015-data-colored-resized.zip", "data")
+        gen.download_file_from_google_drive(data_id, "images.zip", size=491e3)
+        gen.download_content(labels_url, "labels.csv", "data")
         print("Dataset Downloaded Successfully")
     if pretrained:
         pass
