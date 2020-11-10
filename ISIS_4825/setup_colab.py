@@ -43,13 +43,13 @@ def setup_workshop_12(pretrained=True, download_dataset=True):
     print("Util Functions Downloaded Successfully")
     from utils import general as gen
     if download_dataset:
-        data_id = "1--W0SAxjhNRXwGn5gSUgIKTUgjacAFMR"
+        data_id = "1xnK3B6K6KekDI55vwJ0vnc2IGoDga9cj"
         labels_url = "https://github.com/AlexOlsen/DeepWeeds/raw/master/labels/labels.csv"
         gen.download_file_from_google_drive(data_id, "images.zip", size=491e3)
         gen.download_content(labels_url, "labels.csv", "data")
         print("Dataset Downloaded Successfully")
     if pretrained:
-        densenet_id = "1-229MT0M5od5W26tp5YaKqanvmbKG8iD"
+        densenet_id = "1--W0SAxjhNRXwGn5gSUgIKTUgjacAFMR"
         gen.download_file_from_google_drive(densenet_id, "densenet.h5", dst="models", size=45e3)
         print("Pretrained Networks Downloaded Successfully")
     print("Workshop 12 Enabled Successfully")
