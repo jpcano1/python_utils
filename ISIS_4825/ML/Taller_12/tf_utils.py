@@ -29,6 +29,7 @@ class CustomCallback(keras.callbacks.Callback):
         else:
             self.wait += 1
             if self.wait >= self.patience:
+                self.wait = 0
                 print(f"\nEpoch {epoch}, Reducing Learning Rate")
                 lr = K.get_value(self.model.optimizer.lr)
                 new_lr = lr * self.rate
