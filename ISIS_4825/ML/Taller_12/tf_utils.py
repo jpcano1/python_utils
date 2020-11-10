@@ -32,3 +32,9 @@ class CustomCallback(keras.callbacks.Callback):
                 new_lr = lr * self.rate
                 K.set_value(self.model.optimizer.lr, new_lr)
                 print(f"\nLearning Rate Reduced: {new_lr}")
+
+def DenseBlock(units):
+    return keras.Sequential([
+        keras.layers.Dense(units, activation="relu"),
+        keras.layers.BatchNormalization()
+    ])
