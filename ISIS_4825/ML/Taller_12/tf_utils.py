@@ -13,6 +13,7 @@ class CustomCallback(keras.callbacks.Callback):
         self.best_loss = np.Inf
         self.best_recall = 0
         self.wait = 0
+        self.best_weights = None
     
     def on_epoch_end(self, epoch, logs=None):
         current_loss = logs.get("val_loss")
@@ -23,6 +24,7 @@ class CustomCallback(keras.callbacks.Callback):
             self.best_loss = current_loss
             self.best_recall = current_recall
             self.model.save_weights(self.weights_dir)
+            self.best_weights = self.model.get_weights()
             print("\nBest Weights Saved!!")
         else:
             self.wait += 1
@@ -32,6 +34,8 @@ class CustomCallback(keras.callbacks.Callback):
                 new_lr = lr * self.rate
                 K.set_value(self.model.optimizer.lr, new_lr)
                 print(f"\nLearning Rate Reduced: {new_lr}")
+                self.model.load_weights(self.best_weights)
+                print("\nBest Weights Loaded!!")
 
 def DenseBlock(units):
     return keras.Sequential([
