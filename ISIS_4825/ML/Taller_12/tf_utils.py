@@ -34,7 +34,7 @@ class CustomCallback(keras.callbacks.Callback):
                 new_lr = lr * self.rate
                 K.set_value(self.model.optimizer.lr, new_lr)
                 print(f"\nLearning Rate Reduced: {new_lr}")
-                self.model.load_weights(self.best_weights)
+                self.model.set_weights(self.best_weights)
                 print("\nBest Weights Loaded!!")
 
 def DenseBlock(units):
