@@ -50,7 +50,7 @@ def setup_workshop_12(pretrained=True, download_dataset=True):
         print("Dataset Downloaded Successfully")
     if pretrained:
         inception_id = "1Us6XwnpyWYCCY2wRzBTr9ep6kRXcL-jz"
-        gen.download_file_from_google_drive(inception_id, "inception.h5", dst="models", size=86e3)
+        gen.download_file_from_google_drive(inception_id, "inception.h5", dst="models", size=89e3)
         print("Pretrained Networks Downloaded Successfully")
     print("Workshop 12 Enabled Successfully")
 
