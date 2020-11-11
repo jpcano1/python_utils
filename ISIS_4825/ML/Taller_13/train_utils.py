@@ -5,6 +5,10 @@ import torch
 
 from tqdm.auto import tqdm
 
+def get_lr(opt):
+    for param_group in opt.param_groups:
+        return param_group['lr']
+
 def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
     inter = torch.sum(y_true * y_pred, dim=dim)
     union = torch.sum(y_pred, dim=dim) + torch.sum(y_true, dim=dim)
@@ -50,10 +54,6 @@ def epoch_loss(model, criterion, metric, dataloader, device, sanity_check=False,
     loss = epoch_loss / float(len_data)
     acc = epoch_acc / float(len_data)
     return loss, acc
-
-def get_lr(opt):
-    for param_group in opt.param_groups:
-        return param_group['lr']
 
 def train(model, epochs, criterion, opt, train_dl, val_dl, 
           sanity_check, lr_scheduler, weights_dir, device, metric=jaccard, **kwargs):
@@ -112,3 +112,12 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
 
     model.load_state_dict(best_model)
     return model, loss_history, acc_history
+
+def evaluate(model, criterion,  test_dl, device, metric=jaccard):
+    acc = 0.
+    loss = 0.
+
+    model.eval()
+    with torch.no_grad():
+        loss, acc = epoch_loss(model, criterion, metric, test_dl, device, False)
+    return loss, acc
