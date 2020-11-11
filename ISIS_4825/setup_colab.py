@@ -49,8 +49,8 @@ def setup_workshop_12(pretrained=True, download_dataset=True):
         gen.download_content(labels_url, "labels.csv", "data")
         print("Dataset Downloaded Successfully")
     if pretrained:
-        xception_id = "16acLVO6ToGTXMo8iaJZO2IujOB_TPd4z"
-        gen.download_file_from_google_drive(xception_id, "xception.h5", dst="models", size=82e3)
+        inception_id = "1Us6XwnpyWYCCY2wRzBTr9ep6kRXcL-jz"
+        gen.download_file_from_google_drive(inception_id, "inception.h5", dst="models", size=86e3)
         print("Pretrained Networks Downloaded Successfully")
     print("Workshop 12 Enabled Successfully")
 
