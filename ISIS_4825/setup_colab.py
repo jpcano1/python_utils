@@ -70,8 +70,8 @@ def setup_workshop_13(download_dataset=True, pretrained=True):
     if download_dataset:
         train_id = "192V5FfehmbpN2wkl1apiygxSqW6EUmyP"
         test_id = "1--hE7Ucvlsjf-fwET4-JMuS-VAva7Vxq"
-        gen.download_file_from_google_drive(train_id, "train_data.zip", size=212e3, zip=True)
-        gen.download_file_from_google_drive(test_id, "test_data.zip", size=22e3, zip=True)
+        gen.download_file_from_google_drive(train_id, "train_data.zip", size=212e3)
+        gen.download_file_from_google_drive(test_id, "test_data.zip", size=22e3)
         print("Dataset Downloaded Successfully")
     if pretrained:
         autoencoder_id = "1e0N4VKKKQNIQ-nhFSiTjzhfSXiDiYYLs"
