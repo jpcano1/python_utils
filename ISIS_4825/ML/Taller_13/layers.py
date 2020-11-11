@@ -75,8 +75,6 @@ class Encoder(nn.Module):
         current_filters = init_filters
         
         for _ in range(depth - 1):
-            # Pooling Layer
-
             for _ in range(jump - 1):
                 # Convolution Block
                 layer = ConvBlock(current_filters,
