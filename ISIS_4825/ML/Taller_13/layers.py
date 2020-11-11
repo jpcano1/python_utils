@@ -11,7 +11,7 @@ class ConvBlock(nn.Module):
 
         padding_mode = kwargs.get("padding_mode") or "zeros"
         activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
-        bn = kwargs.get("bn") or 0
+        bn = kwargs.get("bn") or False
 
         layers = []
         conv2d_layer = nn.Conv2d(in_channels=in_channels, 
@@ -21,7 +21,7 @@ class ConvBlock(nn.Module):
                                 padding_mode=padding_mode, 
                                 padding=padding)
         layers.append(conv2d_layer)
-        if bn == 1:
+        if bn:
             bn_layer = nn.BatchNorm2d(out_channels)
             layers.append(bn_layer)
 
