@@ -13,12 +13,12 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
     loss = 1 - IoU
     return loss, IoU
 
-def loss_func(y_pred, y_true, metric=jaccard):
+def loss_func(y_pred, y_true, metric):
     loss, acc = metric(y_pred, y_true)
     return loss, acc
 
-def batch_loss(criterion, y_pred, y_true, opt=None):
-    loss, acc = criterion(y_pred, y_true)
+def batch_loss(criterion, y_pred, y_true, metric, opt=None):
+    loss, acc = criterion(y_pred, y_true, metric)
 
     if opt is not None:
         opt.zero_grad()
@@ -27,7 +27,7 @@ def batch_loss(criterion, y_pred, y_true, opt=None):
 
     return loss.item(), acc.item()
 
-def epoch_loss(model, criterion, dataloader, device, sanity_check=False, opt=None):
+def epoch_loss(model, criterion, metric, dataloader, device, sanity_check=False, opt=None):
     epoch_loss = 0.
     epoch_acc = 0.
     len_data = len(dataloader)
@@ -38,7 +38,7 @@ def epoch_loss(model, criterion, dataloader, device, sanity_check=False, opt=Non
 
         y_pred = model(X_batch)
 
-        b_loss, b_acc = batch_loss(criterion, y_pred, y_batch, opt)
+        b_loss, b_acc = batch_loss(criterion, y_pred, y_batch, metric, opt)
         epoch_loss += b_loss
 
         if b_acc is not None:
@@ -56,7 +56,7 @@ def get_lr(opt):
         return param_group['lr']
 
 def train(model, epochs, criterion, opt, train_dl, val_dl, 
-          sanity_check, lr_scheduler, weights_dir, device, **kwargs):
+          sanity_check, lr_scheduler, weights_dir, device, metric=jaccard, **kwargs):
     loss_history = {
         "train": [],
         "val": []
@@ -75,16 +75,16 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         current_lr = get_lr(opt)
 
         model.train()
-        train_loss, train_acc = epoch_loss(model, criterion, train_dl, device,
-                                           sanity_check, opt)
+        train_loss, train_acc = epoch_loss(model, criterion, metric, train_dl, 
+                                           device, sanity_check, opt)
         loss_history["train"].append(train_loss)
         acc_history["train"].append(train_acc)
 
         model.eval()
 
         with torch.no_grad():
-            val_loss, val_acc = epoch_loss(model, criterion, val_dl, device,
-                                           sanity_check)
+            val_loss, val_acc = epoch_loss(model, criterion, metric, val_dl, 
+                                           device, sanity_check)
         
         loss_history["val"].append(val_loss)
         acc_history["val"].append(val_acc)

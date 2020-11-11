@@ -29,18 +29,20 @@ def read_listdir(dir_):
     return np.sort(full_dirs)
 
 def extract_file(filename: str, dst=None):
+    flag = False
     if filename.endswith(".zip"):
+        flag = True
         with zipfile.ZipFile(filename) as zfile:
             print("\nExtracting Zip File...")
             zfile.extractall(dst)
             zfile.close()
-        print("Deleting File...")
-        os.remove(filename)
     elif ".tar" in filename:
+        flag = True
         with tarfile.open(filename, "r") as tfile:
             print("\nExtracting Tar File...")
             tfile.extractall(dst)
             tfile.close()
+    if flag:
         print("Deleting File...")
         os.remove(filename)
 
