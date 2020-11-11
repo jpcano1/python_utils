@@ -30,7 +30,7 @@ def predict(model, random_sample, device, data_dir, labels_dir, class_="kidney")
         X_t = to_tensor(X).unsqueeze(0).to(device)
         y_pred = model(X_t)
         y_pred = y_pred.squeeze(0)
-        y_pred = y_pred[1].cpu().detach().numpy() > .5
+        y_pred = y_pred[channel].cpu().detach().numpy() > .5
         
         plt.subplot(3, 4, 1 + i*4)
         gen.imshow(X, color=False, cmap="bone", title="Image")
