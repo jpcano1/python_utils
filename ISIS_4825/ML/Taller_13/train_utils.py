@@ -18,7 +18,10 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
     return loss, IoU
 
 def loss_func(y_pred, y_true, metric):
+    bce = F.binary_cross_entropy(y_pred, y_true, 
+                                 reduction="mean")
     loss, acc = metric(y_pred, y_true)
+    loss += bce
     return loss, acc
 
 def batch_loss(criterion, y_pred, y_true, metric, opt=None):
@@ -120,4 +123,4 @@ def evaluate(model, criterion,  test_dl, device, metric=jaccard):
     model.eval()
     with torch.no_grad():
         loss, acc = epoch_loss(model, criterion, metric, test_dl, device, False)
-    return loss, acc
+    return loss, 100 * acc
