@@ -12,21 +12,23 @@ import pickle
 """
 OS Functions
 """
-def create_and_verify(*args):
-    full_path = os.path.join(*args)
-    exists = os.path.exists(full_path)
-    if exists:
-        return full_path
-    else:
-        raise FileNotFoundError("La ruta no existe")
-
 def read_listdir(dir_):
     listdir = os.listdir(dir_)
     full_dirs = list()
     for d in listdir:
-        full_dir = create_and_verify(dir_, d)
+        full_dir = os.path.join(dir_, d)
         full_dirs.append(full_dir)
     return np.sort(full_dirs)
+
+def create_and_verify(*args, list_=False):
+    full_path = os.path.join(*args)
+    exists = os.path.exists(full_path)
+    if exists:
+        if list_:
+            return read_listdir(full_path)
+        return full_path
+    else:
+        raise FileNotFoundError("La ruta no existe")
 
 def extract_file(filename: str, dst=None):
     flag = False
