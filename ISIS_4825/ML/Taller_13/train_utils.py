@@ -10,6 +10,19 @@ def get_lr(opt):
         return param_group['lr']
 
 def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
+    """
+
+    :param y_pred:
+    :type y_pred:
+    :param y_true:
+    :type y_true:
+    :param dim:
+    :type dim:
+    :param eps:
+    :type eps:
+    :return:
+    :rtype:
+    """
     inter = torch.sum(y_true * y_pred, dim=dim)
     union = torch.sum(y_pred, dim=dim) + torch.sum(y_true, dim=dim)
     union -= inter
@@ -18,6 +31,17 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
     return loss, IoU
 
 def loss_func(y_pred, y_true, metric):
+    """
+
+    :param y_pred:
+    :type y_pred:
+    :param y_true:
+    :type y_true:
+    :param metric:
+    :type metric:
+    :return:
+    :rtype:
+    """
     bce = F.binary_cross_entropy(y_pred, y_true, 
                                  reduction="mean")
     loss, acc = metric(y_pred, y_true)
@@ -25,6 +49,21 @@ def loss_func(y_pred, y_true, metric):
     return loss, acc
 
 def batch_loss(criterion, y_pred, y_true, metric, opt=None):
+    """
+
+    :param criterion:
+    :type criterion:
+    :param y_pred:
+    :type y_pred:
+    :param y_true:
+    :type y_true:
+    :param metric:
+    :type metric:
+    :param opt:
+    :type opt:
+    :return:
+    :rtype:
+    """
     loss, acc = criterion(y_pred, y_true, metric)
 
     if opt is not None:
@@ -34,7 +73,27 @@ def batch_loss(criterion, y_pred, y_true, metric, opt=None):
 
     return loss.item(), acc.item()
 
-def epoch_loss(model, criterion, metric, dataloader, device, sanity_check=False, opt=None):
+def epoch_loss(model, criterion, metric, dataloader, device,
+               sanity_check=False, opt=None):
+    """
+
+    :param model:
+    :type model:
+    :param criterion:
+    :type criterion:
+    :param metric:
+    :type metric:
+    :param dataloader:
+    :type dataloader:
+    :param device:
+    :type device:
+    :param sanity_check:
+    :type sanity_check:
+    :param opt:
+    :type opt:
+    :return:
+    :rtype:
+    """
     epoch_loss = 0.
     epoch_acc = 0.
     len_data = len(dataloader)
@@ -59,7 +118,37 @@ def epoch_loss(model, criterion, metric, dataloader, device, sanity_check=False,
     return loss, acc
 
 def train(model, epochs, criterion, opt, train_dl, val_dl, 
-          sanity_check, lr_scheduler, weights_dir, device, metric=jaccard, **kwargs):
+          sanity_check, lr_scheduler, weights_dir, device,
+          metric=jaccard, **kwargs):
+    """
+
+    :param model:
+    :type model:
+    :param epochs:
+    :type epochs:
+    :param criterion:
+    :type criterion:
+    :param opt:
+    :type opt:
+    :param train_dl:
+    :type train_dl:
+    :param val_dl:
+    :type val_dl:
+    :param sanity_check:
+    :type sanity_check:
+    :param lr_scheduler:
+    :type lr_scheduler:
+    :param weights_dir:
+    :type weights_dir:
+    :param device:
+    :type device:
+    :param metric:
+    :type metric:
+    :param kwargs:
+    :type kwargs:
+    :return:
+    :rtype:
+    """
     loss_history = {
         "train": [],
         "val": []
@@ -117,6 +206,21 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     return model, loss_history, acc_history
 
 def evaluate(model, criterion,  test_dl, device, metric=jaccard):
+    """
+
+    :param model:
+    :type model:
+    :param criterion:
+    :type criterion:
+    :param test_dl:
+    :type test_dl:
+    :param device:
+    :type device:
+    :param metric:
+    :type metric:
+    :return:
+    :rtype:
+    """
     acc = 0.
     loss = 0.
 

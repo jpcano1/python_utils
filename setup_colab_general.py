@@ -5,6 +5,13 @@ import numpy as np
 import os
 
 def download_github_content(path, filename, chnksz=1000):
+    """
+    Functions that downloads content from python_utils github
+    repository
+    :param path: the file path
+    :param filename: the filename
+    :param chnksz: the chunk size
+    """
     url = f"https://raw.githubusercontent.com/jpcano1/python_utils/main/{path}"
     
     try:
@@ -16,7 +23,7 @@ def download_github_content(path, filename, chnksz=1000):
     with open(filename, "wb") as f:
         try:
             total = int(np.ceil(int(r.headers.get("content-length"))/chnksz))
-        except:
+        except ArithmeticError:
             total = 0
 
         gen = r.iter_content(chunk_size=chnksz)
@@ -29,6 +36,9 @@ def download_github_content(path, filename, chnksz=1000):
     return
 
 def setup_general():
+    """
+    Function that enables the general functions in google colab
+    """
     os.makedirs("utils", exist_ok=True)
     with open("utils/__init__.py", "wb") as f:
         f.close()

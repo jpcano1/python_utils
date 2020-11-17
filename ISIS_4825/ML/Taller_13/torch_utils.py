@@ -7,6 +7,21 @@ Autoencoder Creator
 class Autoencoder(nn.Module):
     def __init__(self, in_channels, out_channels, init_filters, depth, 
                  *args, **kwargs):
+        """
+
+        :param in_channels:
+        :type in_channels:
+        :param out_channels:
+        :type out_channels:
+        :param init_filters:
+        :type init_filters:
+        :param depth:
+        :type depth:
+        :param args:
+        :type args:
+        :param kwargs:
+        :type kwargs:
+        """
         super(Autoencoder, self).__init__()
         jump = kwargs.get("jump") or 1
 
@@ -25,6 +40,21 @@ U-Net Creator
 class UNet(nn.Module):
     def __init__(self, in_channels, out_channels, init_filters, depth, 
                  *args, **kwargs):
+        """
+
+        :param in_channels:
+        :type in_channels:
+        :param out_channels:
+        :type out_channels:
+        :param init_filters:
+        :type init_filters:
+        :param depth:
+        :type depth:
+        :param args:
+        :type args:
+        :param kwargs:
+        :type kwargs:
+        """
         super(UNet, self).__init__()
 
         assert depth > 1, f"{depth} must be greater than one"
@@ -88,6 +118,13 @@ class UNet(nn.Module):
         self.up_layers = nn.ModuleList(self.up_layers)
 
     def forward(self, x):
+        """
+
+        :param x:
+        :type x:
+        :return:
+        :rtype:
+        """
         down_conv_layers = []
 
         for idx, layer in enumerate(self.down_layers):

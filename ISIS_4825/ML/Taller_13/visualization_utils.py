@@ -9,11 +9,41 @@ from skimage.segmentation import mark_boundaries
 
 def get_labeled_image(img, label, outline_color=(1, 0, 0), 
                         color=(1, 0, 0)):
+    """
+
+    :param img:
+    :type img:
+    :param label:
+    :type label:
+    :param outline_color:
+    :type outline_color:
+    :param color:
+    :type color:
+    :return:
+    :rtype:
+    """
     img_mask = mark_boundaries(img, label, outline_color=outline_color, 
                                color=color, mode="thick")
     return img_mask
 
 def predict(model, random_sample, device, data_dir, labels_dir, class_="kidney"):
+    """
+
+    :param model:
+    :type model:
+    :param random_sample:
+    :type random_sample:
+    :param device:
+    :type device:
+    :param data_dir:
+    :type data_dir:
+    :param labels_dir:
+    :type labels_dir:
+    :param class_:
+    :type class_:
+    :return:
+    :rtype:
+    """
     if class_ == "kidney":
         channel = 0
     elif class_ == "tumor":

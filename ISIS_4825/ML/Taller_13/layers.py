@@ -5,12 +5,25 @@ import numpy as np
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, padding=1, *args, **kwargs):
+        """
+        Initializer method
+        :param in_channels: The number of in channels.
+        :param out_channels: The number of out channels
+        :param padding: The padding size
+        :param args: Function arguments
+        :param kwargs: Function Keyword arguments
+        """
         super(ConvBlock, self).__init__()
+        # The kernel size
         kernel_size = kwargs.get("kernel_size") or 3
+        # The stride size
         stride = kwargs.get("stride") or 1
 
+        # Padding Mode
         padding_mode = kwargs.get("padding_mode") or "zeros"
+        # Activation Function
         activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
+        # Batch Normalization
         bn = kwargs.get("bn") or False
 
         layers = []
@@ -26,13 +39,27 @@ class ConvBlock(nn.Module):
             layers.append(bn_layer)
 
         layers.append(activation)
+        # The creation of the layers from a Sequential module.
         self.conv_block = nn.Sequential(*layers)
 
     def forward(self, x):
+        """
+        The forward method
+        :param x: The tensor to be forwarded
+        :return: The tensor forwarded to the convolutional block
+        """
         return self.conv_block(x)
 
 class UpsampleBlock(nn.Module):
     def __init__(self, scale_factor=2, mode="bilinear", *args, **kwargs):
+        """
+        Initializer method
+        :param scale_factor: The factor of upsampling
+        :param mode: The mode of upsampling,
+        generally an interpolation method
+        :param args: Function arguments
+        :param kwargs: Function keyword arguments
+        """
         super(UpsampleBlock, self).__init__()
         if mode != "nearest":
             self.upsample_layer = nn.Upsample(scale_factor=scale_factor, 
@@ -42,10 +69,27 @@ class UpsampleBlock(nn.Module):
                                               mode=mode)
             
     def forward(self, x):
+        """
+        The forward method
+        :param x: The tensor to be
+        :return: The tensor forwarded to the
+        upsample block
+        """
         return self.upsample_layer(x)
 
 class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels, *args, **kwargs):
+        """
+
+        :param in_channels:
+        :type in_channels:
+        :param out_channels:
+        :type out_channels:
+        :param args:
+        :type args:
+        :param kwargs:
+        :type kwargs:
+        """
         super(UpBlock, self).__init__()
         
         activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
@@ -60,6 +104,17 @@ class UpBlock(nn.Module):
 
 class Encoder(nn.Module):
     def __init__(self, in_channels, init_filters, depth, **kwargs):
+        """
+
+        :param in_channels:
+        :type in_channels:
+        :param init_filters:
+        :type init_filters:
+        :param depth:
+        :type depth:
+        :param kwargs:
+        :type kwargs:
+        """
         super(Encoder, self).__init__()
         layers = []
         pool_size = kwargs.get("pool_size") or 2
@@ -101,6 +156,17 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(self, init_filters, out_channels, depth, **kwargs):
+        """
+
+        :param init_filters:
+        :type init_filters:
+        :param out_channels:
+        :type out_channels:
+        :param depth:
+        :type depth:
+        :param kwargs:
+        :type kwargs:
+        """
         super(Decoder, self).__init__()
         layers = []
 

@@ -13,14 +13,29 @@ import pickle
 OS Functions
 """
 def read_listdir(dir_):
+    """
+    Function that returns the fullpath of each dir in
+    the parameter
+    :param dir_: the non-empty directory
+    :return: the list of fulldirs in the directory
+    """
     listdir = os.listdir(dir_)
     full_dirs = list()
     for d in listdir:
+        # Concatenate each dir
         full_dir = os.path.join(dir_, d)
         full_dirs.append(full_dir)
     return np.sort(full_dirs)
 
 def create_and_verify(*args, list_=False):
+    """
+    Function that creates a directory and verifies
+    its existence
+    :param args: the parts of the path
+    :param list_: boolean that determines if the user
+    wants to return a list
+    :return: The path checked
+    """
     full_path = os.path.join(*args)
     exists = os.path.exists(full_path)
     if exists:
