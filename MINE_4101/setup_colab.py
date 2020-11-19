@@ -19,6 +19,13 @@ def setup_lab5():
     id_wine = "1Je03icLBNGad8q58QnJ-eQKex82t3exP"
     gen.download_file_from_google_drive(id_wine, "winequality.csv")
 
+def setup_lab6():
+    setup_general.setup_general()
+    from utils import general as gen
+    url_diet = "https://github.com/hctorresm/Monitoria_CDA/blob/master/Clase9_Python/Diet.xlsx?raw=true"
+    gen.download_content(url_diet, "Diet.xlsx")
+    print("Lab 6 enabled successfully")
+
 def setup_project(filename: str="kaggle.json", download_dataset=True):
     setup_general.setup_general()
     setup_kaggle_token(filename)
