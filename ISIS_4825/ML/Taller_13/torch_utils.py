@@ -8,29 +8,26 @@ class Autoencoder(nn.Module):
     def __init__(self, in_channels, out_channels, init_filters, depth, 
                  *args, **kwargs):
         """
-
-        :param in_channels:
-        :type in_channels:
-        :param out_channels:
-        :type out_channels:
-        :param init_filters:
-        :type init_filters:
-        :param depth:
-        :type depth:
-        :param args:
-        :type args:
-        :param kwargs:
-        :type kwargs:
+        The autoencoder method for generic creation
+        :param in_channels: The number of in channels
+        :param out_channels: The number of out channels
+        :param init_filters: The initial filters
+        :param depth: The depth of the autoencoder
+        :param args: Function arguments
+        :param kwargs: Function Keyword arguments
         """
         super(Autoencoder, self).__init__()
         jump = kwargs.get("jump") or 1
-
+        
+        # The encoder part
         self.encoder = Encoder(in_channels, init_filters, depth,
                                *args, **kwargs)
+        # The decoder part
         self.decoder = Decoder(init_filters * 2**(jump * (depth-1)), 
                                out_channels, depth, *args, **kwargs)
 
     def forward(self, x):
+        
         x = self.encoder(x)
         return self.decoder(x)
 
@@ -43,17 +40,11 @@ class UNet(nn.Module):
         """
 
         :param in_channels:
-        :type in_channels:
         :param out_channels:
-        :type out_channels:
         :param init_filters:
-        :type init_filters:
         :param depth:
-        :type depth:
         :param args:
-        :type args:
         :param kwargs:
-        :type kwargs:
         """
         super(UNet, self).__init__()
 
@@ -65,18 +56,20 @@ class UNet(nn.Module):
         pool_stride = kwargs.get("pool_stride") or 2
         self.jump = kwargs.get("jump") or 1
 
-        init_layer = ConvBlock(in_channels, init_filters)
+        init_layer = ConvBlock(in_channels, init_filters, 
+                               *args, **kwargs)
         self.down_layers.append(init_layer)
-        bn = kwargs.get("bn") or 0
 
         current_filters = init_filters
 
         for j in range(self.jump - 1):
             if j == self.jump - 2:
-                layer = ConvBlock(current_filters, current_filters * 2, bn=bn)
+                layer = ConvBlock(current_filters, current_filters * 2, 
+                                  *args, **kwargs)
                 current_filters *= 2
             else:
-                layer = ConvBlock(current_filters, current_filters)
+                layer = ConvBlock(current_filters, current_filters, 
+                                  *args, **kwargs)
 
             self.down_layers.append(layer)
 
@@ -85,17 +78,21 @@ class UNet(nn.Module):
             self.down_layers.append(layer)
 
             if self.jump > 1:
-                layer = ConvBlock(current_filters, current_filters, bn=bn)
+                layer = ConvBlock(current_filters, current_filters, 
+                                  *args, **kwargs)
             else:
-                layer = ConvBlock(current_filters, current_filters * 2, bn=bn)
+                layer = ConvBlock(current_filters, current_filters * 2, 
+                                  *args, **kwargs)
 
             self.down_layers.append(layer)
 
             for j in range(self.jump - 1):
                 if j == self.jump - 2:
-                    layer = ConvBlock(current_filters, current_filters * 2, bn=bn)
+                    layer = ConvBlock(current_filters, current_filters * 2, 
+                                      *args, **kwargs)
                 else:
-                    layer = ConvBlock(current_filters, current_filters)
+                    layer = ConvBlock(current_filters, current_filters, 
+                                      *args, **kwargs)
 
                 self.down_layers.append(layer)
 
@@ -103,16 +100,17 @@ class UNet(nn.Module):
 
         for _ in range(depth - 1):
             layer = UpBlock(current_filters + current_filters // 2,
-                            current_filters // 2)
+                            current_filters // 2, *args, **kwargs)
             self.up_layers.append(layer)
             current_filters //= 2
 
             for _ in range(self.jump - 1):
-                layer = ConvBlock(current_filters, current_filters, bn=bn)
+                layer = ConvBlock(current_filters, current_filters, 
+                                  *args, **kwargs)
                 self.up_layers.append(layer)
 
         self.final_layer = ConvBlock(current_filters, out_channels, padding=0,
-                                     activation=nn.Sigmoid(), kernel_size=1, bn=bn)
+                                     activation=nn.Sigmoid(), kernel_size=1, bn=False)
 
         self.down_layers = nn.ModuleList(self.down_layers)
         self.up_layers = nn.ModuleList(self.up_layers)
@@ -121,9 +119,7 @@ class UNet(nn.Module):
         """
 
         :param x:
-        :type x:
         :return:
-        :rtype:
         """
         down_conv_layers = []
 

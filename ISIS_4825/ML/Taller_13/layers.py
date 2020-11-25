@@ -80,22 +80,22 @@ class UpsampleBlock(nn.Module):
 class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
-
-        :param in_channels:
-        :type in_channels:
-        :param out_channels:
-        :type out_channels:
-        :param args:
-        :type args:
-        :param kwargs:
-        :type kwargs:
+        The Up block mixed with convolutional block
+        and transposed pooling layers
+        :param in_channels: The in channels of the block
+        :param out_channels: The out channels of the block
+        :param args: Function arguments
+        :param kwargs: Function keyword arguments
         """
         super(UpBlock, self).__init__()
         
+        # Activation Layer
         activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
+        # Transpose pooling layer
         self.upsample = UpsampleBlock()
+        # Convolutional Block
         self.conv_layer = ConvBlock(in_channels, out_channels, 
-                                    activation=activation)
+                                    *args, **kwargs)
 
     def forward(self, down_conv, last_conv):
         last_conv = self.upsample(last_conv)
@@ -103,7 +103,7 @@ class UpBlock(nn.Module):
         return self.conv_layer(x)
 
 class Encoder(nn.Module):
-    def __init__(self, in_channels, init_filters, depth, **kwargs):
+    def __init__(self, in_channels, init_filters, depth, *args, **kwargs):
         """
 
         :param in_channels:
@@ -120,11 +120,10 @@ class Encoder(nn.Module):
         pool_size = kwargs.get("pool_size") or 2
         pool_stride = kwargs.get("pool_stride") or 2
 
-        bn = kwargs.get("bn") or 0
-
         jump = kwargs.get("jump") or 1
 
-        init_layer = ConvBlock(in_channels, init_filters)
+        init_layer = ConvBlock(in_channels, init_filters, 
+                               *args, **kwargs)
         layers.append(init_layer)
 
         current_filters = init_filters
@@ -133,18 +132,22 @@ class Encoder(nn.Module):
             for _ in range(jump - 1):
                 # Convolution Block
                 layer = ConvBlock(current_filters,
-                                  current_filters * 2, bn=bn)
+                                  current_filters * 2, 
+                                  *args,
+                                  **kwargs)
                 layers.append(layer)
 
                 current_filters *= 2
 
             # Pooling Block
-            layer = nn.MaxPool2d(kernel_size=pool_size, stride=pool_stride)
+            layer = nn.MaxPool2d(kernel_size=pool_size, 
+                                 stride=pool_stride)
             layers.append(layer)
 
             # Convolution Block
             layer = ConvBlock(current_filters,
-                              current_filters * 2, bn=bn)
+                              current_filters * 2, 
+                              *args, **kwargs)
             layers.append(layer)
 
             current_filters *= 2
@@ -155,7 +158,7 @@ class Encoder(nn.Module):
         return self.encoder(x)
 
 class Decoder(nn.Module):
-    def __init__(self, init_filters, out_channels, depth, **kwargs):
+    def __init__(self, init_filters, out_channels, depth, *args, **kwargs):
         """
 
         :param init_filters:
@@ -173,8 +176,6 @@ class Decoder(nn.Module):
         scale_factor = kwargs.get("scale_factor") or 2 
         mode = kwargs.get("mode") or "bilinear"
 
-        bn = kwargs.get("bn") or 0
-
         jump = kwargs.get("jump") or 1
 
         current_filters = init_filters
@@ -182,7 +183,8 @@ class Decoder(nn.Module):
         for _ in range(depth - 1):    
             for _ in range(jump - 1):
                 layer = ConvBlock(current_filters,
-                                  current_filters // 2, bn=bn)
+                                  current_filters // 2,
+                                  *args, **kwargs)
                 layers.append(layer)
 
                 current_filters //= 2
@@ -190,13 +192,14 @@ class Decoder(nn.Module):
             layer = UpsampleBlock(scale_factor=scale_factor, mode=mode)
             layers.append(layer)
             layer = ConvBlock(current_filters,
-                              current_filters // 2)
+                              current_filters // 2, 
+                              *args, **kwargs)
             layers.append(layer)
 
             current_filters //= 2
 
         layer = ConvBlock(current_filters, out_channels, 
-                          activation=nn.Sigmoid(), bn=bn)
+                          activation=nn.Sigmoid(), *args, **kwargs)
         layers.append(layer)
         self.decoder = nn.Sequential(*layers)
 

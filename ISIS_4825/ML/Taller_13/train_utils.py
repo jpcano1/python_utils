@@ -67,8 +67,11 @@ def batch_loss(criterion, y_pred, y_true, metric, opt=None):
     loss, acc = criterion(y_pred, y_true, metric)
 
     if opt is not None:
+        # Clean the gradients
         opt.zero_grad()
+        # Apply the backpropagation algorithm
         loss.backward()
+        # Apply the gradients over the net
         opt.step()
 
     return loss.item(), acc.item()
@@ -123,31 +126,18 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     """
 
     :param model:
-    :type model:
     :param epochs:
-    :type epochs:
     :param criterion:
-    :type criterion:
     :param opt:
-    :type opt:
     :param train_dl:
-    :type train_dl:
     :param val_dl:
-    :type val_dl:
     :param sanity_check:
-    :type sanity_check:
     :param lr_scheduler:
-    :type lr_scheduler:
     :param weights_dir:
-    :type weights_dir:
     :param device:
-    :type device:
     :param metric:
-    :type metric:
     :param kwargs:
-    :type kwargs:
     :return:
-    :rtype:
     """
     loss_history = {
         "train": [],
