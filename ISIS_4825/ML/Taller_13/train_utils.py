@@ -80,26 +80,30 @@ def batch_loss(criterion, y_pred, y_true, metric, opt=None):
 def epoch_loss(model, criterion, metric, dataloader, device,
                sanity_check=False, opt=None):
     """
-
-    :param model:
-    :param criterion:
-    :param metric:
-    :param dataloader:
-    :param device:
-    :param sanity_check:
-    :param opt:
-    :return:
+    The loss per epoch
+    :param model: The model to be trained
+    :param criterion: The loss function
+    :param metric: The metric function
+    :param dataloader: The dataloader
+    :param device: The hardware accelerator device
+    :param sanity_check: The sanity check flag
+    :param opt: The optimizer of the model
+    :return: The loss and the metric per epoch
     """
     epoch_loss = 0.
     epoch_acc = 0.
     len_data = len(dataloader)
 
+    # Loop over each data batch
     for X_batch, y_batch in tqdm(dataloader):
+        # Allocate the data in the device
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
 
+        # Make the predictions
         y_pred = model(X_batch)
 
+        # Calculate the batch loss
         b_loss, b_acc = batch_loss(criterion, y_pred, y_batch, metric, opt)
         epoch_loss += b_loss
 
@@ -109,6 +113,7 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         if sanity_check:
             break
 
+    # Calculate the mean
     loss = epoch_loss / float(len_data)
     acc = epoch_acc / float(len_data)
     return loss, acc
