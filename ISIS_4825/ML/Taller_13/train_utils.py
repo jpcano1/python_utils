@@ -6,74 +6,75 @@ import torch
 from tqdm.auto import tqdm
 
 def get_lr(opt):
+    """
+    Obtain the learning rate of the optimizer
+    :param opt: The optimizer of the model
+    :return: The learning rate of the optimizer
+    """
+    # Loop through the opt params
     for param_group in opt.param_groups:
         return param_group['lr']
 
 def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
     """
-
-    :param y_pred:
-    :type y_pred:
-    :param y_true:
-    :type y_true:
-    :param dim:
-    :type dim:
-    :param eps:
-    :type eps:
-    :return:
-    :rtype:
+    Intersection over Union metric
+    :param y_pred: The predictions of the model
+    :param y_true: The true labels of the data
+    :param dim: The axis where we calculate the operations
+    :param eps: The tolerance
+    :return: The loss calculated and the IoU metric
     """
+    # Intersection
     inter = torch.sum(y_true * y_pred, dim=dim)
+    # Union
     union = torch.sum(y_pred, dim=dim) + torch.sum(y_true, dim=dim)
     union -= inter
+    # The whole metric
     IoU = ((inter + eps) / (union + eps)).mean()
     loss = 1 - IoU
     return loss, IoU
 
 def loss_func(y_pred, y_true, metric):
     """
-
-    :param y_pred:
-    :type y_pred:
-    :param y_true:
-    :type y_true:
-    :param metric:
-    :type metric:
-    :return:
-    :rtype:
+    The loss function calculator
+    :param y_pred: The predictions of the model
+    :param y_true: The true labels of the data
+    :param metric: The metric of the model
+    :return: The loss calculated and the metric
     """
+    # We take the binary cross-entropy
+    # for binary classification
     bce = F.binary_cross_entropy(y_pred, y_true, 
                                  reduction="mean")
+    # Loss and metric
     loss, acc = metric(y_pred, y_true)
+    # Sum the binary cross-entropy
     loss += bce
     return loss, acc
 
 def batch_loss(criterion, y_pred, y_true, metric, opt=None):
     """
-
-    :param criterion:
-    :type criterion:
-    :param y_pred:
-    :type y_pred:
-    :param y_true:
-    :type y_true:
-    :param metric:
-    :type metric:
-    :param opt:
-    :type opt:
-    :return:
-    :rtype:
+    The loss per batch in the dataset
+    :param criterion: The loss functions
+    :param y_pred: The predictions of the model
+    :param y_true: The true labels of the data
+    :param metric: The metric of the model
+    :param opt: The optimizer
+    :return: The loss calculated and the metric
     """
+    # Calculate loss and metric
     loss, acc = criterion(y_pred, y_true, metric)
 
+    # Backpropagation method if train mode
     if opt is not None:
-        # Clean the gradients
+        # Clean the gradients of the optimizer
         opt.zero_grad()
         # Apply the backpropagation algorithm
         loss.backward()
-        # Apply the gradients over the net
+        # Apply the gradients over the neural net
         opt.step()
 
+    # Return the numbers of the loss and the metric
     return loss.item(), acc.item()
 
 def epoch_loss(model, criterion, metric, dataloader, device,
@@ -81,21 +82,13 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     """
 
     :param model:
-    :type model:
     :param criterion:
-    :type criterion:
     :param metric:
-    :type metric:
     :param dataloader:
-    :type dataloader:
     :param device:
-    :type device:
     :param sanity_check:
-    :type sanity_check:
     :param opt:
-    :type opt:
     :return:
-    :rtype:
     """
     epoch_loss = 0.
     epoch_acc = 0.
@@ -124,67 +117,84 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
           sanity_check, lr_scheduler, weights_dir, device,
           metric=jaccard, **kwargs):
     """
-
-    :param model:
-    :param epochs:
-    :param criterion:
-    :param opt:
-    :param train_dl:
-    :param val_dl:
-    :param sanity_check:
-    :param lr_scheduler:
-    :param weights_dir:
-    :param device:
-    :param metric:
-    :param kwargs:
-    :return:
+    The training loop
+    :param model: The model to be trained and evaluated
+    :param epochs: The number of epochs per training
+    :param criterion: The loss function
+    :param opt: The optimizer
+    :param train_dl: The train dataloader
+    :param val_dl: The validation data loader
+    :param sanity_check: The sanity check flag
+    :param lr_scheduler: The scheduler for the learning rate
+    :param weights_dir: The directory of weights
+    :param device: The hardware accelerator device
+    :param metric: The metric function
+    :param kwargs: Function Keyword arguments
+    :return: The best model trained and the history
     """
+    # Loss history dictionary
     loss_history = {
         "train": [],
         "val": []
     }
 
+    # Accuracy history dictionary
     acc_history = {
         "train": [],
         "val": []
     }
 
+    # Best parameters
     best_model = copy.deepcopy(model.state_dict())
     best_loss = kwargs.get("best_loss") or float("inf")
     best_acc = kwargs.get("best_acc") or 0
 
+    # Loop through the epochs
     for _ in tqdm(range(epochs)):
         current_lr = get_lr(opt)
 
+        # Activate all layers
         model.train()
-        train_loss, train_acc = epoch_loss(model, criterion, metric, train_dl, 
-                                           device, sanity_check, opt)
+        # Calculate the train loss and accuracy
+        train_loss, train_acc = epoch_loss(model, criterion, metric,
+                                           train_dl, device, sanity_check,
+                                           opt)
+        # Append to the dictionaries
         loss_history["train"].append(train_loss)
         acc_history["train"].append(train_acc)
 
+        # Deactivate all layers
         model.eval()
 
+        # Deactivate the PyTorch AutoGrad
         with torch.no_grad():
+            # Calculate the validation loss and accuracy
             val_loss, val_acc = epoch_loss(model, criterion, metric, val_dl, 
                                            device, sanity_check)
-        
+        # Append to the dictionaries
         loss_history["val"].append(val_loss)
         acc_history["val"].append(val_acc)
 
+        # Conditional to have the best loss and best accuracy
         if val_loss < best_loss or val_acc > best_acc:
             best_loss = val_loss
             best_acc = val_acc
             best_model = copy.deepcopy(model.state_dict())
-            
+
+            # Save best model
             torch.save(model.state_dict(), weights_dir)
             print("Copied best model weights!")
-        
+
+        # We call the scheduler to analyse the val loss
         lr_scheduler.step(val_loss)
 
+        # If the scheduler changed the learning rate
+        # Take the best model weights.
         if current_lr != get_lr(opt):
             print("Loading best model weights!")
             model.load_state_dict(best_model)
 
+        # Print metric messages
         print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
         print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
         print("-"*50)
@@ -192,6 +202,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         if sanity_check:
             break
 
+    # Load best model and return
     model.load_state_dict(best_model)
     return model, loss_history, acc_history
 
@@ -199,17 +210,11 @@ def evaluate(model, criterion,  test_dl, device, metric=jaccard):
     """
 
     :param model:
-    :type model:
     :param criterion:
-    :type criterion:
     :param test_dl:
-    :type test_dl:
     :param device:
-    :type device:
     :param metric:
-    :type metric:
     :return:
-    :rtype:
     """
     acc = 0.
     loss = 0.
