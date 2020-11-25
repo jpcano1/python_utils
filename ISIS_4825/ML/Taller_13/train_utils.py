@@ -113,6 +113,27 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     acc = epoch_acc / float(len_data)
     return loss, acc
 
+def evaluate(model, criterion,  dataloader, device, sanity_check, metric=jaccard):
+    """
+    Method that evaluates the model on a dataloader
+    :param model: The model to e evaluated
+    :param criterion: The loss function
+    :param dataloader: The dataloader
+    :param device: The hardware accelerator device
+    :param sanity_check: The sanity check flag
+    :param metric: The metric function
+    :return: The loss calculated and the metric
+    """
+    # Deactivate all layers
+    model.eval()
+
+    # Deactivate the PyTorch AutoGrad
+    with torch.no_grad():
+        # Calculate the validation loss and accuracy
+        loss, acc = epoch_loss(model, criterion, metric,
+                               dataloader, device, sanity_check)
+    return loss, acc
+
 def train(model, epochs, criterion, opt, train_dl, val_dl, 
           sanity_check, lr_scheduler, weights_dir, device,
           metric=jaccard, **kwargs):
@@ -163,14 +184,9 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         loss_history["train"].append(train_loss)
         acc_history["train"].append(train_acc)
 
-        # Deactivate all layers
-        model.eval()
+        val_loss, val_acc = evaluate(model, criterion, val_dl,
+                                     device, sanity_check)
 
-        # Deactivate the PyTorch AutoGrad
-        with torch.no_grad():
-            # Calculate the validation loss and accuracy
-            val_loss, val_acc = epoch_loss(model, criterion, metric, val_dl, 
-                                           device, sanity_check)
         # Append to the dictionaries
         loss_history["val"].append(val_loss)
         acc_history["val"].append(val_acc)
@@ -205,21 +221,3 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     # Load best model and return
     model.load_state_dict(best_model)
     return model, loss_history, acc_history
-
-def evaluate(model, criterion,  test_dl, device, metric=jaccard):
-    """
-
-    :param model:
-    :param criterion:
-    :param test_dl:
-    :param device:
-    :param metric:
-    :return:
-    """
-    acc = 0.
-    loss = 0.
-
-    model.eval()
-    with torch.no_grad():
-        loss, acc = epoch_loss(model, criterion, metric, test_dl, device, False)
-    return loss, 100 * acc
