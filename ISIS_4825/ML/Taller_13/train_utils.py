@@ -118,7 +118,7 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     acc = epoch_acc / float(len_data)
     return loss, acc
 
-def evaluate(model, criterion,  dataloader, device, sanity_check, metric=jaccard):
+def evaluate(model, criterion, dataloader, device, sanity_check, metric=jaccard):
     """
     Method that evaluates the model on a dataloader
     :param model: The model to e evaluated
