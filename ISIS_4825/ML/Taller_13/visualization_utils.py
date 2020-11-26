@@ -37,10 +37,8 @@ def predict(model, device, dataset, class_="kidney", random_state=None):
         raise Exception("No es la clase esperada")
 
     # Set the random seed
-    if random_state is not None:
+    if random_state:
         np.random.seed(random_state)
-    else:
-        np.random.seed(42)
 
     # Take the random sample
     random_sample = np.random.choice(len(dataset), 3)
