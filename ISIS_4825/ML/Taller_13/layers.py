@@ -26,6 +26,8 @@ class ConvBlock(nn.Module):
         bn = kwargs.get("bn") or False
 
         layers = []
+
+        # Convolutional layer creation
         conv2d_layer = nn.Conv2d(in_channels=in_channels, 
                                 out_channels=out_channels, 
                                 kernel_size=kernel_size, 
@@ -50,7 +52,8 @@ class ConvBlock(nn.Module):
         return self.conv_block(x)
 
 class UpsampleBlock(nn.Module):
-    def __init__(self, scale_factor=2, mode="bilinear", *args, **kwargs):
+    def __init__(self, scale_factor=2, mode="bilinear", 
+                 *args, **kwargs):
         """
         Initializer method
         :param scale_factor: The factor of upsampling
@@ -60,6 +63,8 @@ class UpsampleBlock(nn.Module):
         :param kwargs: Function keyword arguments
         """
         super(UpsampleBlock, self).__init__()
+
+        # Conditional modes
         if mode != "nearest":
             self.upsample_layer = nn.Upsample(scale_factor=scale_factor, 
                                               mode=mode, align_corners=True)
