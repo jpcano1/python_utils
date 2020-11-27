@@ -76,30 +76,51 @@ class UpsampleBlock(nn.Module):
         """
         return self.upsample_layer(x)
 
+class DownBlock(nn.Module):
+    def __init__(self, in_channels, out_channels,
+                 *args, **kwargs):
+        super(DownBlock, self).__init__()
+
+        layers = []
+
+        jump = kwargs.get("jump") or 1
+
+        init_layer = ConvBlock(in_channels, out_channels, 
+                               *args, **kwargs)
+        
+        layers.append(init_layer)        
+        for _ in range(jump - 1):
+            layer = ConvBlock(out_channels, out_channels, 
+                              *args, **kwargs)
+            layers.append(layer)
+
+        self.down_block = nn.Sequential(*layers)
+    
+    def forward(self, x):
+        return self.down_block(x)
+
 class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels, *args, **kwargs):
-        """
-        The Up block mixed with convolutional block
-        and transposed pooling layers
-        :param in_channels: The in channels of the block
-        :param out_channels: The out channels of the block
-        :param args: Function arguments
-        :param kwargs: Function keyword arguments
-        """
         super(UpBlock, self).__init__()
-        
-        # Activation Layer
-        activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
-        # Transpose pooling layer
-        self.upsample = UpsampleBlock()
-        # Convolutional Block
-        self.conv_layer = ConvBlock(in_channels, out_channels, 
-                                    *args, **kwargs)
 
+        jump = kwargs.get("jump") or 1
+        layers = []
+        self.upsample = UpsampleBlock(*args, **kwargs)
+        
+        layer = ConvBlock(in_channels, out_channels, 
+                          *args, **kwargs)
+        layers.append(layer)
+
+        for _ in range(jump - 1):
+            layer = ConvBlock(out_channels, out_channels, 
+                              *args, **kwargs)
+            layers.append(layer)
+        self.conv_block = nn.Sequential(*layers)
+    
     def forward(self, down_conv, last_conv):
         last_conv = self.upsample(last_conv)
         x = torch.cat((last_conv, down_conv), dim=1)
-        return self.conv_layer(x)
+        return self.conv_block(x)
 
 class Encoder(nn.Module):
     def __init__(self, in_channels, init_filters, depth, *args, **kwargs):

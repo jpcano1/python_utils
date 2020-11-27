@@ -1,7 +1,9 @@
 # 1611 lines
 
 from torch import nn
-from .layers import ConvBlock, UpBlock, Encoder, Decoder
+from .layers import (ConvBlock, UpBlock, 
+                     Encoder, Decoder, 
+                     DownBlock)
 
 """
 Autoencoder Creator
@@ -57,109 +59,67 @@ class UNet(nn.Module):
         super(UNet, self).__init__()
 
         # Depth must be greater than one
-        assert depth > 1, f"{depth} must be greater than one"
-
-        # Down and up layers
-        self.down_layers = []
-        self.up_layers = []
+        assert depth > 1, f"Depth must be greater than one"
+        
+        # Down and up blocks
+        down_blocks = []
+        up_blocks = []
 
         # Keyword arguments
         pool_size = kwargs.get("pool_size") or 2
         pool_stride = kwargs.get("pool_stride") or 2
-        self.jump = kwargs.get("jump") or 1
-
+        
         # Initial Layer
-        init_layer = ConvBlock(in_channels, init_filters, 
-                               *args, **kwargs)
-        self.down_layers.append(init_layer)
+        self.init_layer = ConvBlock(in_channels, init_filters, 
+                                    *args, **kwargs)
 
         current_filters = init_filters
 
-        # Add convolutional layers while jump is greater than 1
-        for j in range(self.jump - 1):
-            if j == self.jump - 2:
-                layer = ConvBlock(current_filters, current_filters * 2, 
-                                  *args, **kwargs)
-                current_filters *= 2
-            else:
-                layer = ConvBlock(current_filters, current_filters, 
-                                  *args, **kwargs)
+        down_block = DownBlock(current_filters, current_filters * 2,
+                               *args, **kwargs)
+        down_blocks.append(down_block)
+        current_filters *= 2
 
-            self.down_layers.append(layer)
-
-        # Loop through the down layers
         for _ in range(depth - 1):
-            # Add max pool of last down block
             layer = nn.MaxPool2d(kernel_size=pool_size, stride=pool_stride)
-            self.down_layers.append(layer)
+            down_blocks.append(layer)
 
-            # Double current filters if jump greater than 1
-            if self.jump > 1:
-                layer = ConvBlock(current_filters, current_filters, 
-                                  *args, **kwargs)
-            else:
-                layer = ConvBlock(current_filters, current_filters * 2, 
-                                  *args, **kwargs)
-
-            # Append to the down layers
-            self.down_layers.append(layer)
-
-            # Add convolutional layers while jump greater than 1
-            for j in range(self.jump - 1):
-                if j == self.jump - 2:
-                    # If index equals to the last layer
-                    # Double filters
-                    layer = ConvBlock(current_filters, current_filters * 2, 
-                                      *args, **kwargs)
-                else:
-                    layer = ConvBlock(current_filters, current_filters, 
-                                      *args, **kwargs)
-                # Append to the down layers
-                self.down_layers.append(layer)
-
+            down_block = DownBlock(current_filters, 
+                                   current_filters * 2, *args,
+                                   **kwargs)
+            down_blocks.append(down_block)
             current_filters *= 2
-        # Loop through the up layers
+        
         for _ in range(depth - 1):
-            # Create the transpose pool layer of last convolutional layer
-            layer = UpBlock(current_filters + current_filters // 2,
+            up_block = UpBlock(current_filters + current_filters // 2,
                             current_filters // 2, *args, **kwargs)
-            self.up_layers.append(layer)
+            up_blocks.append(up_block)
             current_filters //= 2
-             # Append layers while jump greater than 1
-            for _ in range(self.jump - 1):
-                layer = ConvBlock(current_filters, current_filters, 
-                                  *args, **kwargs)
-                self.up_layers.append(layer)
+        
+        self.down_blocks = nn.ModuleList(down_blocks)
+        self.up_blocks = nn.ModuleList(up_blocks)
 
-        # Final layer with the output filters
-        self.final_layer = ConvBlock(current_filters, out_channels, padding=0,
-                                     activation=nn.Sigmoid(), kernel_size=1, bn=False)
-
-        self.down_layers = nn.ModuleList(self.down_layers)
-        self.up_layers = nn.ModuleList(self.up_layers)
-
+        self.final_layer = ConvBlock(current_filters, out_channels, padding=0, 
+                                     activation=nn.Sigmoid(), kernel_size=1,
+                                     bn=True)
+        
     def forward(self, x):
         """
         The forward method
         :param x: The tensor to be forwarded
         :return: The tensor forwarded to the convolutional block
         """
-        # The down convolutional blocks
-        down_conv_layers = []
+        x = self.init_layer(x)
+        
+        down_blocks = []
 
-        # The down convolutional pass
-        for idx, layer in enumerate(self.down_layers):
-            x = layer(x)
-            if isinstance(layer, ConvBlock):
-                down_conv_layers.append(x)
+        for idx, block in enumerate(self.down_blocks):
+            x = block(x)
+            if isinstance(block, DownBlock):
+                down_blocks.append(x)
 
-        # The up convolutional pass
-        for idx, layer in enumerate(self.up_layers):
-            # Concatenate with the respective down layer
-            if isinstance(layer, UpBlock):
-                idx_layer = -(idx + self.jump + 1)
-                x = layer(down_conv_layers[idx_layer], x)
-            else:
-                x = layer(x)
-        # Forward through the last layer
+        for idx, block in enumerate(self.up_blocks):
+            idx_block = -(idx + 2)
+            x = block(down_blocks[idx_block], x)
+        
         return self.final_layer(x)
