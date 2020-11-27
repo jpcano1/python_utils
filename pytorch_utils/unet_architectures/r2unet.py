@@ -3,7 +3,7 @@ from torch import nn
 from .general_layers import ConvBlock
 from .layers import RRUpBlock, RRDownBlock
 
-class RRUNet(nn.Module):
+class R2UNet(nn.Module):
     def __init__(self, in_channels, out_channels, init_filters, depth, 
                  *args, **kwargs):
         """
@@ -15,7 +15,7 @@ class RRUNet(nn.Module):
         :param args: Function arguments
         :param kwargs: Function Keyword arguments
         """
-        super(RRUNet, self).__init__()
+        super(R2UNet, self).__init__()
 
         # Depth must be greater than one
         assert depth > 1, f"Depth must be greater than one"
