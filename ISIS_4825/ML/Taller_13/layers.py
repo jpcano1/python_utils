@@ -88,7 +88,7 @@ class DownBlock(nn.Module):
         init_layer = ConvBlock(in_channels, out_channels, 
                                *args, **kwargs)
         
-        layers.append(init_layer)        
+        layers.append(init_layer)
         for _ in range(jump - 1):
             layer = ConvBlock(out_channels, out_channels, 
                               *args, **kwargs)
