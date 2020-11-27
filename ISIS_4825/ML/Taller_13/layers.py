@@ -271,4 +271,11 @@ class Decoder(nn.Module):
         self.decoder = nn.Sequential(*layers)
 
     def forward(self, x):
+        """
+        
+        :param x:
+        :type x:
+        :return:
+        :rtype:
+        """
         return self.decoder(x)
