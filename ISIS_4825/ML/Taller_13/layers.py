@@ -84,16 +84,29 @@ class UpsampleBlock(nn.Module):
 class DownBlock(nn.Module):
     def __init__(self, in_channels, out_channels,
                  *args, **kwargs):
+        """
+        Initializer method
+        :param in_channels: The number of in channels.
+        :param out_channels: The number of out channels.
+        :param args: Function arguments.
+        :param kwargs: Function keyword arguments.
+        """
         super(DownBlock, self).__init__()
 
+        # Create the layers list
         layers = []
 
+        # The number of convolutions per block
         jump = kwargs.get("jump") or 1
 
+        # The initial layer of the jump loop
         init_layer = ConvBlock(in_channels, out_channels, 
                                *args, **kwargs)
         
         layers.append(init_layer)
+
+        # Append convolutional blocks if
+        # jump is greater than 1
         for _ in range(jump - 1):
             layer = ConvBlock(out_channels, out_channels, 
                               *args, **kwargs)
@@ -102,64 +115,91 @@ class DownBlock(nn.Module):
         self.down_block = nn.Sequential(*layers)
     
     def forward(self, x):
+        """
+        The forward method
+        :param x: The tensor to be forwarded
+        :return: The tensor forwarded to down block
+        """
         return self.down_block(x)
 
 class UpBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, *args, **kwargs):
+    def __init__(self, in_channels, out_channels,
+                 *args, **kwargs):
+        """
+        Initializer method
+        :param in_channels: The number of in channels
+        :param out_channels: The number of out channels
+        :param args: Function arguments
+        :param kwargs: Function keyword arguments
+        """
         super(UpBlock, self).__init__()
 
         jump = kwargs.get("jump") or 1
         layers = []
+
+        # The upsampling layer
         self.upsample = UpsampleBlock(*args, **kwargs)
-        
+
+        # The first convolutional layer
         layer = ConvBlock(in_channels, out_channels, 
                           *args, **kwargs)
         layers.append(layer)
 
+        # Append convolutional blocks
+        # if jump is greater than 1
         for _ in range(jump - 1):
             layer = ConvBlock(out_channels, out_channels, 
                               *args, **kwargs)
             layers.append(layer)
         self.conv_block = nn.Sequential(*layers)
     
-    def forward(self, down_conv, last_conv):
-        last_conv = self.upsample(last_conv)
-        x = torch.cat((last_conv, down_conv), dim=1)
+    def forward(self, down_block, last_block):
+        """
+        The forward method
+        :param down_block: The tensor from the down block
+        :param last_block: The tensor from the last block
+        :return:
+        """
+        last_block = self.upsample(last_block)
+        x = torch.cat((last_block, down_block), dim=1)
         return self.conv_block(x)
 
 class Encoder(nn.Module):
     def __init__(self, in_channels, init_filters, depth, *args, **kwargs):
         """
-
-        :param in_channels:
-        :type in_channels:
-        :param init_filters:
-        :type init_filters:
-        :param depth:
-        :type depth:
-        :param kwargs:
-        :type kwargs:
+        Initializer method
+        :param in_channels: The number of in channels
+        :param init_filters: The number of init filters
+        :param depth: The depth of the Net
+        :param args: Function arguments
+        :param kwargs: Function keyword arguments
         """
         super(Encoder, self).__init__()
         layers = []
         pool_size = kwargs.get("pool_size") or 2
         pool_stride = kwargs.get("pool_stride") or 2
 
+        # The number of convolutions per block
         jump = kwargs.get("jump") or 1
 
+        # First layer
         init_layer = ConvBlock(in_channels, init_filters, 
                                *args, **kwargs)
         layers.append(init_layer)
 
         current_filters = init_filters
-        
+
+        # Loop down through the depth
         for _ in range(depth - 1):
+            # Append convolutional blocks
+            # if jump is greater than 1
             for _ in range(jump - 1):
                 # Convolution Block
                 layer = ConvBlock(current_filters,
                                   current_filters * 2, 
                                   *args,
                                   **kwargs)
+                # Append Layers
                 layers.append(layer)
 
                 current_filters *= 2
@@ -177,23 +217,25 @@ class Encoder(nn.Module):
 
             current_filters *= 2
 
+        # Create encoder
         self.encoder = nn.Sequential(*layers)
 
     def forward(self, x):
+        """
+        The forward method
+        :param x: The tensor to be forwarded
+        :return: The forwarded tensor
+        """
         return self.encoder(x)
 
 class Decoder(nn.Module):
     def __init__(self, init_filters, out_channels, depth, *args, **kwargs):
         """
-
+        Initializer Method
         :param init_filters:
-        :type init_filters:
         :param out_channels:
-        :type out_channels:
         :param depth:
-        :type depth:
         :param kwargs:
-        :type kwargs:
         """
         super(Decoder, self).__init__()
         layers = []
