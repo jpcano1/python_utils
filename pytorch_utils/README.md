@@ -10,13 +10,8 @@
 !shred -u setup_colab.py
 !shred -u setup_colab_general.py
 !wget -q "https://github.com/jpcano1/python_utils/raw/main/setup_colab_general.py" -O setup_colab_general.py
-!wget -q "https://github.com/jpcano1/python_utils/raw/main/ISIS_4825/setup_colab.py" -O setup_colab.py
+!wget -q "https://raw.githubusercontent.com/jpcano1/python_utils/main/pytorch_utils/setup_colab.py" -O setup_colab.py
 import setup_colab as setup
-# setup.setup_workshop_8()
-# setup.setup_workshop_9()
-# setup.setup_workshop_10()
-# setup.setup_workshop_11()
-# setup.setup_workshop_12()
-# setup.setup_workshop_13()
-# setup.setup_extra_workshop()
+# setup.setup_unet()
+# setup.setup_runet()
 ```
