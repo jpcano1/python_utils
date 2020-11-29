@@ -20,7 +20,7 @@ def get_labeled_image(img, label, outline_color=(1, 0, 0),
                                color=color, mode="thick")
     return img_mask
 
-def predict(model, device, dataset, class_="kidney", random_state=None):
+def predict(model, device, dataset, class_: str="kidney", random_state=None):
     """
     Method to make predictions from a model
     :param model: The model that makes the prediction
@@ -62,7 +62,7 @@ def predict(model, device, dataset, class_="kidney", random_state=None):
         gen.imshow(X, color=False, cmap="bone", title="Image")
 
         plt.subplot(3, 4, 2 + i*4)
-        gen.imshow(y_pred, color=False, title="Predicted Tumor")
+        gen.imshow(y_pred, color=False, title=f"Predicted {class_.title()}")
 
         plt.subplot(3, 4, 3 + i*4)
         gen.imshow(vis.mark_boundaries(X, y_pred), title="Boundary")
