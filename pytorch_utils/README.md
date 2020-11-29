@@ -1,4 +1,4 @@
-# Semantic Segmentation Architectures
+# PyTorch Util Functions
 ## Util Functions for Personal Work
 ***
 - Open the notebook you wish to execute
