@@ -54,7 +54,8 @@ def setup_workshop_12(pretrained=True, download_dataset=True):
         print("Pretrained Networks Downloaded Successfully")
     print("Workshop 12 Enabled Successfully")
 
-def setup_workshop_13(download_dataset=True, pretrained=True):
+def setup_workshop_13(download_dataset=True, pretrained=True, 
+                      brats=False):
     setup_general.setup_general()
     os.system("pip install -q albumentations==0.5.0")
     torch_path = "ISIS_4825/ML/Taller_13/torch_utils.py"
@@ -75,12 +76,22 @@ def setup_workshop_13(download_dataset=True, pretrained=True):
         print("Dataset Downloaded Successfully")
     if pretrained:
         autoencoder_id = "1ZGDKYCHZFpW1D-rx8xmxxjJiFoc5N1Au"
-        unet_id = "19sUh-X_qWa9orUMAaTUWVCsJKSaqvoKR"
+        unet_id = "1kfd4_30DIdp3Di8fU5_h4I-EdFKEY7Uq"
         gen.download_file_from_google_drive(autoencoder_id, "autoencoder.pt",
                                             dst="./models", size=49e3)
         gen.download_file_from_google_drive(unet_id, "unet.pt",
                                             dst="./models", size=22e3)
         print("Pretrained Networks Downloaded Successfully")
+    if brats:
+        part_1 = "1NRAFehzp6WtpoQduMJ5PGt1ivC8NhpJ1"
+        part_2 = "1-6vfu9nBu1PIabcZPMAmX685M1mOkceI"
+        gen.download_file_from_google_drive(part_1, 
+                                            "brats_part_1.zip", 
+                                            size=426.8e3)
+        gen.download_file_from_google_drive(part_2,
+                                            "brats_part_2.zip",
+                                            size=370.3e3)
+        print("Dataset BraTS Downloaded Successfully")
     print("Workshop 13 Enabled Successfully")
 
 def setup_extra_workshop(download_dataset=True):
