@@ -1,5 +1,6 @@
 from torch import nn
-from .general_layers import (ConvBlock, UpBlock, DownBlock)
+from .general_layers import ConvBlock
+from .layers import UpBlock, DownBlock
 
 class UNet(nn.Module):
     def __init__(self, in_channels, out_channels, init_filters, depth, 
