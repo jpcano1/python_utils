@@ -19,8 +19,7 @@ def get_labeled_image(img, label, outline_color=(1, 0, 0),
                                color=color, mode=mode)
     return img_mask
 
-def predict(model, device, dataset, class_: str="kidney", 
-            random_state=None, **kwargs):
+def predict(model, device, dataset, class_: str="kidney", **kwargs):
     """
     Method to make predictions from a model
     :param model: The model that makes the prediction
@@ -35,10 +34,6 @@ def predict(model, device, dataset, class_: str="kidney",
         channel = 1
     else:
         raise Exception("No es la clase esperada")
-
-    # Set the random seed
-    if random_state:
-        np.random.seed(random_state)
 
     # Take the random sample
     random_sample = np.random.choice(len(dataset), 3)
