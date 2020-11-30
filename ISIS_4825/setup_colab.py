@@ -57,7 +57,9 @@ def setup_workshop_12(pretrained=True, download_dataset=True):
 def setup_workshop_13(download_dataset=True, pretrained=True, 
                       brats=False):
     setup_general.setup_general()
+    
     os.system("pip install -q albumentations==0.5.0")
+    print("Libraries Installed!")
     torch_path = "ISIS_4825/ML/Taller_13/torch_utils.py"
     vis_path = "ISIS_4825/ML/Taller_13/visualization_utils.py"
     layers_path = "ISIS_4825/ML/Taller_13/layers.py"
