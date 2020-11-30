@@ -1,13 +1,11 @@
 from . import general as gen
-from . import visualization_utils as vis
 import numpy as np
 import matplotlib.pyplot as plt
 
-from torchvision.transforms.functional import to_tensor
 from skimage.segmentation import mark_boundaries
 
 def get_labeled_image(img, label, outline_color=(1, 0, 0), 
-                        color=(1, 0, 0)):
+                        color=(1, 0, 0), mode="outer"):
     """
     Function to get the labeled image
     :param img: The image
@@ -16,11 +14,13 @@ def get_labeled_image(img, label, outline_color=(1, 0, 0),
     :param color: The color of fill
     :return: The mask and the image merged
     """
+    assert mode in ['thick', 'inner', 'outer', 'subpixel']
     img_mask = mark_boundaries(img, label, outline_color=outline_color, 
-                               color=color, mode="thick")
+                               color=color, mode=mode)
     return img_mask
 
-def predict(model, device, dataset, class_: str="kidney", random_state=None):
+def predict(model, device, dataset, class_: str="kidney", 
+            random_state=None, **kwargs):
     """
     Method to make predictions from a model
     :param model: The model that makes the prediction
@@ -65,7 +65,7 @@ def predict(model, device, dataset, class_: str="kidney", random_state=None):
         gen.imshow(y_pred, color=False, title=f"Predicted {class_.title()}")
 
         plt.subplot(3, 4, 3 + i*4)
-        gen.imshow(vis.mark_boundaries(X, y_pred), title="Boundary")
+        gen.imshow(get_labeled_image(X, y_pred, **kwargs), title="Boundary")
 
         plt.subplot(3, 4, 4 + i*4)
         gen.imshow(y_true, color=False, title="True Label")
