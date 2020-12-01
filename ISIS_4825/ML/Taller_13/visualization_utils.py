@@ -68,3 +68,11 @@ def predict(model, device, dataset, class_: str="kidney",
 
         plt.subplot(3, 4, 4 + i*4)
         gen.imshow(y_true, color=False, title="True Label")
+
+def rugosity(image):
+    if image.max() != 0:
+        var = image.var()
+        max = image.max() ** 2
+        return 1 - (1 / (1 + var/max))
+    else:
+        return 0
