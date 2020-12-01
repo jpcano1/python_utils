@@ -5,6 +5,10 @@ import torch
 
 from tqdm.auto import tqdm
 
+import numpy as np
+
+from . import general as gen
+
 def get_lr(opt):
     """
     Obtain the learning rate of the optimizer
@@ -226,3 +230,23 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     # Load best model and return
     model.load_state_dict(best_model)
     return model, loss_history, acc_history
+
+class SimpleGenerator:
+    def __init__(self, path2data):
+        self.data_dir = gen.read_listdir(path2data[0])
+        self.labels_dir = gen.read_listdir(path2data[1])
+
+    def __len__(self):
+        return len(self.data_dir)
+
+    def size(self):
+        return len(self)
+
+    def __getitem__(self, idx):
+        path2img = self.data_dir[idx]
+        path2lab = self.labels_dir[idx]
+
+        X = np.load(path2img)
+        y = np.load(path2lab)
+
+        return X, y
