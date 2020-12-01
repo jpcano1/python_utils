@@ -1,7 +1,7 @@
 import torch
 
-def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5, 
-            reduction="mean"):
+def jaccard(y_pred, y_true, *args, dim=(2, 3), eps=1e-5,
+            reduction="mean", **kwargs):
     """
     Intersection over Union metric
     :param y_pred: The predictions of the model
@@ -26,8 +26,8 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5,
     loss = 1 - IoU
     return loss, IoU
 
-def dice(y_pred, y_true, dim=(2, 3), eps=1e-5, 
-         reduction="mean"):
+def dice(y_pred, y_true, *args, dim=(2, 3), eps=1e-5, 
+         reduction="mean", **kwargs):
     """
     Dice Similarity metric, Sørensen index
     :param y_pred: The predictions of the model
