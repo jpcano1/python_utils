@@ -209,7 +209,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         # Print metric messages
         print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
         print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
-        print("-"*50)
+        print("-"*60)
 
         if sanity_check:
             break
