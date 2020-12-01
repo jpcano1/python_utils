@@ -3,7 +3,10 @@ import os
 
 def setup_architecture(architecture="unet"):
     assert architecture in ["unet", "runet"]
+
     os.makedirs("train_utils", exist_ok=True)
+    with open("train_utils/__init__.py", "wb") as f:
+        f.close()
     setup_general.setup_general()
     metrics_path = "pytorch_utils/train_utils/metrics.py"
     train_loop_path = "pytorch_utils/train_utils/seg_train_loops.py"
@@ -19,6 +22,8 @@ def setup_architecture(architecture="unet"):
         setup_general.download_github_content(unet_path, "utils/unet.py")
         print("U-Net Enabled")
     if architecture == "runet":
+        layers_path = "pytorch_utils/unet_architectures/layers.py"
         runet_path = "pytorch_utils/unet_architectures/runet.py"
         setup_general.download_github_content(runet_path, "utils/runet.py")
+        setup_general.download_github_content(layers_path, "utils/layers.py")
         print("RU-Net Enabled")
