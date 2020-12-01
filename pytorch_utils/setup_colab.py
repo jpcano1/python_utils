@@ -17,7 +17,8 @@ def setup_architecture(architecture="unet"):
     setup_general.download_github_content(train_loop_path, 
                                           "train_utils/train_loop.py")
     setup_general.download_github_content(layers_path, "utils/layers.py")
-
+    print("Layers and utils enabled")
+    
     if architecture == "unet" or "unet" in architecture:
         unet_path = "pytorch_utils/unet_architectures/unet.py"
         setup_general.download_github_content(unet_path, "utils/unet.py")
