@@ -1,7 +1,9 @@
 import setup_colab_general as setup_general
+import os
 
 def setup_architecture(architecture="unet"):
     assert architecture in ["unet", "runet"]
+    os.makedirs("train_utils", exist_ok=True)
     setup_general.setup_general()
     metrics_path = "pytorch_utils/train_utils/metrics.py"
     train_loop_path = "pytorch_utils/train_utils/seg_train_loops.py"
