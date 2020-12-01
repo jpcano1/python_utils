@@ -2,8 +2,6 @@ import setup_colab_general as setup_general
 import os
 
 def setup_architecture(architecture="unet"):
-    assert architecture in ["unet", "runet"]
-
     os.makedirs("train_utils", exist_ok=True)
     with open("train_utils/__init__.py", "wb") as f:
         f.close()
