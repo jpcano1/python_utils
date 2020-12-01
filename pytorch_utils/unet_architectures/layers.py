@@ -109,10 +109,10 @@ class RecurrentConvBlock(nn.Module):
         :param x: The tensor to be forwarded
         :return: The tensor forwarded to the convolutional block
         """
-        result = self.conv_block(x)
+        x = self.conv_block(x)
         for _ in range(self.t - 1):
-            result = self.conv_block(x + result)
-        return result
+            out = self.conv_block(x + x)
+        return out
 
 class RecurrentDownBlock(nn.Module):
     def __init__(self, in_channels, out_channels,
