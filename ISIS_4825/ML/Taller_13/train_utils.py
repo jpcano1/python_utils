@@ -9,6 +9,8 @@ import numpy as np
 
 from . import general as gen
 
+from collections import OrderedDict
+
 def get_lr(opt):
     """
     Obtain the learning rate of the optimizer
@@ -96,10 +98,16 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     """
     epoch_loss = 0.
     epoch_acc = 0.
-    len_data = len(dataloader)
 
+    total_loss = 0.
+    total_acc = 0.
+
+    bar = tqdm(dataloader)
+    counter = 1.
     # Loop over each data batch
-    for X_batch, y_batch in tqdm(dataloader):
+    for X_batch, y_batch in bar:
+        status = OrderedDict()
+
         # Allocate the data in the device
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
@@ -110,17 +118,25 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         # Calculate the batch loss
         b_loss, b_acc = batch_loss(criterion, y_pred, y_batch, metric, opt)
         epoch_loss += b_loss
+        epoch_acc += b_acc
 
-        if b_acc is not None:
-            epoch_acc += b_acc
-            
+        # Calculate mean each step
+        total_loss = epoch_loss / counter
+        total_acc = epoch_acc / counter
+
+        if opt is not None:
+            status["train_loss"] = total_loss
+            status["train_acc"] = total_acc
+        else:
+            status["val_loss"] = total_loss
+            status["val_acc"] = total_acc
+
         if sanity_check:
             break
 
-    # Calculate the mean
-    loss = epoch_loss / float(len_data)
-    acc = epoch_acc / float(len_data)
-    return loss, acc
+        counter += 1
+
+    return total_loss, total_acc
 
 def evaluate(model, criterion, dataloader, device, sanity_check, metric=jaccard):
     """
