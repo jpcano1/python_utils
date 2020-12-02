@@ -106,9 +106,16 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     if epoch is not None:
         bar.set_description(f"Epoch: {epoch}")
 
+    if opt is not None:
+        loss_key = "train_loss"
+        acc_key = "train_acc"
+    else:
+        loss_key = "val_loss"
+        acc_key = "val_acc"
+
+    status = OrderedDict()
     # Loop over each data batch
     for X_batch, y_batch in bar:
-        status = OrderedDict()
 
         # Allocate the data in the device
         X_batch = X_batch.to(device)
@@ -124,12 +131,8 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         epoch_acc += b_acc
 
         # Update bar status
-        if opt is not None:
-            status["train_loss"] = b_loss
-            status["train_acc"] = b_acc * 100.
-        else:
-            status["val_loss"] = b_loss
-            status["val_acc"] = b_acc * 100.
+        status[loss_key] = b_loss
+        status[acc_key] = b_acc * 100.
 
         bar.set_postfix(status)
         if sanity_check:
@@ -138,6 +141,12 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     # Calculate the mean
     loss = epoch_loss / float(len_data)
     acc = epoch_acc / float(len_data)
+
+    # Final Update
+    status[loss_key] = loss
+    status[acc_key] = acc * 100.
+
+    bar.set_postfix(status)
     return loss, acc
 
 def evaluate(model, criterion, dataloader, device, 
