@@ -21,7 +21,7 @@ class ConvBlock(nn.Module):
         # Activation Function
         activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
         # Batch Normalization
-        bn = kwargs.get("bn") or False
+        bn = kwargs.get("bn") or True
 
         layers = []
 
