@@ -126,10 +126,10 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         # Update bar status
         if opt is not None:
             status["train_loss"] = b_loss
-            status["train_acc"] = b_acc
+            status["train_acc"] = b_acc * 100.
         else:
             status["val_loss"] = b_loss
-            status["val_acc"] = b_acc
+            status["val_acc"] = b_acc * 100.
 
         bar.set_postfix(status)
         if sanity_check:
@@ -209,7 +209,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         # Calculate the train loss and accuracy
         train_loss, train_acc = epoch_loss(model, criterion, metric,
                                            train_dl, device, sanity_check,
-                                           opt, epoch)
+                                           opt, epoch + 1)
         # Append to the dictionaries
         loss_history["train"].append(train_loss)
         acc_history["train"].append(train_acc)
@@ -239,10 +239,6 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         if current_lr != get_lr(opt):
             print("Loading best model weights!")
             model.load_state_dict(best_model)
-
-        # Print metric messages
-        # print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
-        # print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
 
         if sanity_check:
             break
