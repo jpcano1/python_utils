@@ -110,7 +110,7 @@ class RecurrentConvBlock(nn.Module):
         :return: The tensor forwarded to the convolutional block
         """
         result = self.conv_block(x)
-        for _ in range(self.t - 1):
+        for _ in range(self.t):
             result = self.conv_block(x + result)
         return result
 
