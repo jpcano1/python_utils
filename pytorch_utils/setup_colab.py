@@ -29,6 +29,6 @@ def setup_architecture(architecture="unet"):
         print("RU-Net Enabled")
 
     if architecture == "r2unet" or "r2unet" in architecture:
-        r2unet_path = "pytorch_utils/unet_architectures/runet.py"
+        r2unet_path = "pytorch_utils/unet_architectures/r2unet.py"
         setup_general.download_github_content(r2unet_path, "utils/r2unet.py")
         print("R2U-Net Enabled")
