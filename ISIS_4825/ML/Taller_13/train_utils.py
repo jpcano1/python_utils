@@ -84,7 +84,7 @@ def batch_loss(criterion, y_pred, y_true, metric, opt=None):
     return loss.item(), acc.item()
 
 def epoch_loss(model, criterion, metric, dataloader, device,
-               sanity_check=False, opt=None):
+               sanity_check=False, opt=None, epoch=None):
     """
     The loss per epoch
     :param model: The model to be trained
@@ -99,11 +99,13 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     epoch_loss = 0.
     epoch_acc = 0.
 
-    total_loss = 0.
-    total_acc = 0.
+    len_data = len(dataloader)
 
     bar = tqdm(dataloader)
-    counter = 1.
+
+    if epoch is not None:
+        bar.set_description(f"Epoch: {epoch}")
+
     # Loop over each data batch
     for X_batch, y_batch in bar:
         status = OrderedDict()
@@ -116,30 +118,30 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         y_pred = model(X_batch)
 
         # Calculate the batch loss
-        b_loss, b_acc = batch_loss(criterion, y_pred, y_batch, metric, opt)
+        b_loss, b_acc = batch_loss(criterion, y_pred, 
+                                   y_batch, metric, opt)
         epoch_loss += b_loss
         epoch_acc += b_acc
 
-        # Calculate mean each step
-        total_loss = epoch_loss / counter
-        total_acc = epoch_acc / counter
-
+        # Update bar status
         if opt is not None:
-            status["train_loss"] = total_loss
-            status["train_acc"] = total_acc
+            status["train_loss"] = b_loss
+            status["train_acc"] = b_acc
         else:
-            status["val_loss"] = total_loss
-            status["val_acc"] = total_acc
+            status["val_loss"] = b_loss
+            status["val_acc"] = b_acc
 
         bar.set_postfix(status)
         if sanity_check:
             break
+    
+    # Calculate the mean
+    loss = epoch_loss / float(len_data)
+    acc = epoch_acc / float(len_data)
+    return loss, acc
 
-        counter += 1
-
-    return total_loss, total_acc
-
-def evaluate(model, criterion, dataloader, device, sanity_check, metric=jaccard):
+def evaluate(model, criterion, dataloader, device, 
+             sanity_check, metric=jaccard):
     """
     Method that evaluates the model on a dataloader
     :param model: The model to e evaluated
@@ -197,7 +199,9 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     best_acc = kwargs.get("best_acc") or 0
 
     # Loop through the epochs
-    for _ in tqdm(range(epochs)):
+    for epoch in tqdm(range(epochs)):
+        print("-"*50)
+
         current_lr = get_lr(opt)
 
         # Activate all layers
@@ -205,7 +209,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         # Calculate the train loss and accuracy
         train_loss, train_acc = epoch_loss(model, criterion, metric,
                                            train_dl, device, sanity_check,
-                                           opt)
+                                           opt, epoch)
         # Append to the dictionaries
         loss_history["train"].append(train_loss)
         acc_history["train"].append(train_acc)
@@ -237,9 +241,8 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
             model.load_state_dict(best_model)
 
         # Print metric messages
-        print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
-        print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
-        print("-"*50)
+        # print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
+        # print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
 
         if sanity_check:
             break
