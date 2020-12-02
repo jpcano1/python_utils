@@ -131,6 +131,7 @@ def epoch_loss(model, criterion, metric, dataloader, device,
             status["val_loss"] = total_loss
             status["val_acc"] = total_acc
 
+        bar.set_postfix(status)
         if sanity_check:
             break
 
