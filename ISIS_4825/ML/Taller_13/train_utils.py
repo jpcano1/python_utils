@@ -138,15 +138,11 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         if sanity_check:
             break
     
+    bar.close()
     # Calculate the mean
     loss = epoch_loss / float(len_data)
     acc = epoch_acc / float(len_data)
 
-    # Final Update
-    status[loss_key] = loss
-    status[acc_key] = acc * 100.
-
-    bar.set_postfix(status)
     return loss, acc
 
 def evaluate(model, criterion, dataloader, device, 
@@ -209,8 +205,6 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
 
     # Loop through the epochs
     for epoch in tqdm(range(epochs)):
-        print("-"*50)
-
         current_lr = get_lr(opt)
 
         # Activate all layers
@@ -248,6 +242,10 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         if current_lr != get_lr(opt):
             print("Loading best model weights!")
             model.load_state_dict(best_model)
+
+        print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
+        print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
+        print("-"*50)
 
         if sanity_check:
             break
