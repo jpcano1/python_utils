@@ -104,7 +104,7 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     bar = tqdm(dataloader)
 
     if epoch is not None:
-        bar.set_description(f"Epoch: {epoch}")
+        bar.set_description(f"Epoch {epoch}")
 
     if opt is not None:
         loss_key = "train_loss"
