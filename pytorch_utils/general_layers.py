@@ -14,8 +14,12 @@ class ConvBlock(nn.Module):
         """
         super(ConvBlock, self).__init__()
         # Activation Function
-        activation = kwargs.get("activation") or nn.LeakyReLU(0.2, 
-                                                              inplace=True)
+
+        if kwargs.get("activation"):
+            activation = kwargs.get("activation")
+        else:
+            activation = nn.LeakyReLU(0.2,
+                                    inplace=True)
 
         self.conv_block = nn.Sequential(
             # Convolutional Layer
