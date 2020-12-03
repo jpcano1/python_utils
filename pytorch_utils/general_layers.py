@@ -1,7 +1,8 @@
 from torch import nn
 
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, padding=1, *args, **kwargs):
+    def __init__(self, in_channels, out_channels, 
+                 padding=1, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels.
