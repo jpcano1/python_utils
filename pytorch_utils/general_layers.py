@@ -15,31 +15,29 @@ class ConvBlock(nn.Module):
         kernel_size = kwargs.get("kernel_size") or 3
         # The stride size
         stride = kwargs.get("stride") or 1
-
         # Padding Mode
         padding_mode = kwargs.get("padding_mode") or "zeros"
+        # Bias
+        bias = kwargs.get("bias") or True
+        # Inplace
+        inplace = kwargs.get("inplace") or True
         # Activation Function
-        activation = kwargs.get("activation") or nn.LeakyReLU(0.2)
-        # Batch Normalization
-        bn = kwargs.get("bn") or True
+        activation = kwargs.get("activation") or nn.LeakyReLU(0.2, 
+                                                              inplace=inplace)
 
-        layers = []
-
-        # Convolutional layer creation
-        conv2d_layer = nn.Conv2d(in_channels=in_channels, 
-                                out_channels=out_channels, 
-                                kernel_size=kernel_size, 
-                                stride=stride, 
-                                padding_mode=padding_mode, 
-                                padding=padding)
-        layers.append(conv2d_layer)
-        if bn:
-            bn_layer = nn.BatchNorm2d(out_channels)
-            layers.append(bn_layer)
-
-        layers.append(activation)
-        # The creation of the layers from a Sequential module.
-        self.conv_block = nn.Sequential(*layers)
+        self.conv_block = nn.Sequential(
+            # Convolutional Layer
+            nn.Conv2d(in_channels=in_channels, 
+                                 out_channels=out_channels, 
+                                 kernel_size=kernel_size, 
+                                 stride=stride, 
+                                 padding_mode=padding_mode, 
+                                 padding=padding, bias=bias),
+            # Batch Normalization Layer
+            nn.BatchNorm2d(out_channels),
+            # Activation Layer
+            activation
+        )
 
     def forward(self, x):
         """
