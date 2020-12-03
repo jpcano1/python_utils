@@ -1,8 +1,9 @@
 from torch import nn
 
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, 
-                 padding=1, *args, **kwargs):
+    def __init__(self, in_channels, out_channels, kernel_size=3, 
+                 stride=1, padding=1, padding_mode="zeros", bias=True,
+                 *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels.
@@ -12,28 +13,18 @@ class ConvBlock(nn.Module):
         :param kwargs: Function Keyword arguments
         """
         super(ConvBlock, self).__init__()
-        # The kernel size
-        kernel_size = kwargs.get("kernel_size") or 3
-        # The stride size
-        stride = kwargs.get("stride") or 1
-        # Padding Mode
-        padding_mode = kwargs.get("padding_mode") or "zeros"
-        # Bias
-        bias = kwargs.get("bias") or True
-        # Inplace
-        inplace = kwargs.get("inplace") or True
         # Activation Function
         activation = kwargs.get("activation") or nn.LeakyReLU(0.2, 
-                                                              inplace=inplace)
+                                                              inplace=True)
 
         self.conv_block = nn.Sequential(
             # Convolutional Layer
             nn.Conv2d(in_channels=in_channels, 
-                                 out_channels=out_channels, 
-                                 kernel_size=kernel_size, 
-                                 stride=stride, 
-                                 padding_mode=padding_mode, 
-                                 padding=padding, bias=bias),
+                      out_channels=out_channels, 
+                      kernel_size=kernel_size, 
+                      stride=stride, 
+                      padding_mode=padding_mode, 
+                      padding=padding, bias=bias),
             # Batch Normalization Layer
             nn.BatchNorm2d(out_channels),
             # Activation Layer
