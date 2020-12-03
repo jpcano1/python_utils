@@ -2,7 +2,7 @@ from torch import nn
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=3, 
-                 stride=1, padding=1, padding_mode="zeros", bias=True,
+                 stride=1, padding=1, padding_mode="zeros", bias=False,
                  *args, **kwargs):
         """
         Initializer method
@@ -19,7 +19,7 @@ class ConvBlock(nn.Module):
             activation = kwargs.get("activation")
         else:
             activation = nn.LeakyReLU(0.2,
-                                    inplace=True)
+                                      inplace=True)
 
         self.conv_block = nn.Sequential(
             # Convolutional Layer
