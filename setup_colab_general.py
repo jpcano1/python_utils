@@ -35,13 +35,13 @@ def download_github_content(path, filename, chnksz=1000):
         r.close()
     return
 
-def setup_general():
+def setup_general(dst="utils"):
     """
     Function that enables the general functions in google colab
     """
-    os.makedirs("utils", exist_ok=True)
-    with open("utils/__init__.py", "wb") as f:
+    os.makedirs(dst, exist_ok=True)
+    with open(f"{dst}/__init__.py", "wb") as f:
         f.close()
 
-    download_github_content("utils/general.py", "utils/general.py")
+    download_github_content(f"{dst}/general.py", f"{dst}/general.py")
     print("General Functions Enabled Successfully")

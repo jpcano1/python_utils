@@ -13,7 +13,7 @@ def setup_kaggle_token(filename: str):
 
 def setup_project(filename="kaggle.json", download_dataset=True, 
                   kaggle_version="1.5.6"):
-    setup_general.setup_general()
+    setup_general.setup_general(dst="libs")
     setup_kaggle_token(filename)
     os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
