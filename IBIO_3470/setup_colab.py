@@ -18,7 +18,7 @@ def setup_project(filename="kaggle.json", download_dataset=True,
     os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
         os.system("kaggle datasets download -d tourist55/alzheimers-dataset-4-class-of-images")
-        from utils import general as gen
+        from libs import general as gen
         gen.extract_file("alzheimers-dataset-4-class-of-images.zip", "data")
         print("Dataset Downloaded Successfully")
     print("Workshop Project Enabled Successfully")
