@@ -43,5 +43,5 @@ def setup_general(dst="utils"):
     with open(f"{dst}/__init__.py", "wb") as f:
         f.close()
 
-    download_github_content(f"{dst}/general.py", f"{dst}/general.py")
+    download_github_content("utils/general.py", f"{dst}/general.py")
     print("General Functions Enabled Successfully")
