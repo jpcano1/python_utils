@@ -11,14 +11,11 @@ def setup_kaggle_token(filename: str):
     os.system(f"cp {filename} ~/.kaggle/")
     os.system(f"chmod 600 ~/.kaggle/{filename}")
 
-def setup_project(filename="kaggle.json", download_dataset=True, 
-                  kaggle_version="1.5.6"):
+def setup_project(download_dataset=True):
     setup_general.setup_general(dst="libs")
-    setup_kaggle_token(filename)
-    os.system(f"pip install -q kaggle=={kaggle_version}")
     if download_dataset:
-        os.system("kaggle datasets download -d tourist55/alzheimers-dataset-4-class-of-images")
         from libs import general as gen
-        gen.extract_file("alzheimers-dataset-4-class-of-images.zip", "data")
+        data_id = "1VZ9MvahloAaejUZUci-q_CIHTzfFtzsK"
+        gen.download_file_from_google_drive(data_id, "data.zip", size=35e3)
         print("Dataset Downloaded Successfully")
     print("Workshop Project Enabled Successfully")
