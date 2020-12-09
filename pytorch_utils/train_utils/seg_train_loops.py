@@ -116,7 +116,7 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         status[acc_key] = b_acc * 100.
 
         bar.set_postfix(status)
-        
+
         if sanity_check:
             break
     # Calculate the mean
@@ -126,7 +126,7 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     status.clear()
 
     status["mean_" + loss_key] = loss
-    status["mean_" + acc_key] = acc
+    status["mean_" + acc_key] = acc * 100.
     bar.set_postfix(status)
     bar.close()
 
