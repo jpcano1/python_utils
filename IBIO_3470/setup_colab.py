@@ -16,6 +16,6 @@ def setup_project(download_dataset=True):
     if download_dataset:
         from libs import general as gen
         data_id = "1VZ9MvahloAaejUZUci-q_CIHTzfFtzsK"
-        gen.download_file_from_google_drive(data_id, "data.zip", size=35e3)
+        gen.download_file_from_google_drive(data_id, "data.zip", size=35.87e3)
         print("Dataset Downloaded Successfully")
     print("Workshop Project Enabled Successfully")
