@@ -7,6 +7,8 @@ from tqdm.auto import tqdm
 
 from .metrics import jaccard
 
+from collections import OrderedDict
+
 def get_lr(opt):
     """
     Obtain the learning rate of the optimizer
@@ -65,7 +67,7 @@ def batch_loss(criterion, y_pred, y_true, metric, opt=None, **kwargs):
     return loss.item(), acc.item()
 
 def epoch_loss(model, criterion, metric, dataloader, device,
-               sanity_check=False, opt=None, **kwargs):
+               sanity_check=False, opt=None, epoch=None, **kwargs):
     """
     The loss per epoch
     :param model: The model to be trained
@@ -81,8 +83,21 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     epoch_acc = 0.
     len_data = len(dataloader)
 
+    bar = tqdm(dataloader)
+
+    if epoch is not None:
+        bar.set_description(f"Epoch {epoch}")
+
+    if opt is not None:
+        loss_key = "train_loss"
+        acc_key = "train_acc"
+    else:
+        loss_key = "loss"
+        acc_key = "acc"
+
+    status = OrderedDict()
     # Loop over each data batch
-    for X_batch, y_batch in tqdm(dataloader):
+    for X_batch, y_batch in bar:
         # Allocate the data in the device
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
@@ -95,20 +110,25 @@ def epoch_loss(model, criterion, metric, dataloader, device,
                                    y_batch, metric, opt, 
                                    **kwargs)
         epoch_loss += b_loss
+        epoch_acc += b_acc
 
-        if b_acc is not None:
-            epoch_acc += b_acc
+        status[loss_key] = b_loss
+        status[acc_key] = b_acc * 100.
+
+        bar.set_postfix(status)
             
         if sanity_check:
             break
-
+    
+    bar.close()
     # Calculate the mean
     loss = epoch_loss / float(len_data)
     acc = epoch_acc / float(len_data)
+
     return loss, acc
 
-def evaluate(model, criterion, dataloader, device, sanity_check, 
-             metric=jaccard, **kwargs):
+def evaluate(model, criterion, dataloader, device, 
+             sanity_check, metric=jaccard, **kwargs):
     """
     Method that evaluates the model on a dataloader
     :param model: The model to e evaluated
@@ -167,7 +187,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     best_acc = kwargs.get("best_acc") or 0
 
     # Loop through the epochs
-    for _ in tqdm(range(epochs)):
+    for epoch in tqdm(range(epochs)):
         current_lr = get_lr(opt)
 
         # Activate all layers
@@ -175,7 +195,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         # Calculate the train loss and accuracy
         train_loss, train_acc = epoch_loss(model, criterion, metric,
                                            train_dl, device, sanity_check,
-                                           opt, **kwargs)
+                                           opt, epoch + 1, **kwargs)
         # Append to the dictionaries
         loss_history["train"].append(train_loss)
         acc_history["train"].append(train_acc)
