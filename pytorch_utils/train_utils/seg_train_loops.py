@@ -116,7 +116,7 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         status[acc_key] = b_acc * 100.
 
         bar.set_postfix(status)
-            
+        
         if sanity_check:
             break
     # Calculate the mean
