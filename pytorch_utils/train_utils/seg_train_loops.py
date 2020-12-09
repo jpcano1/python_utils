@@ -119,11 +119,15 @@ def epoch_loss(model, criterion, metric, dataloader, device,
             
         if sanity_check:
             break
-    
-    bar.close()
     # Calculate the mean
     loss = epoch_loss / float(len_data)
     acc = epoch_acc / float(len_data)
+
+    status.clear()
+
+    status["mean_" + loss_key] = loss
+    status["mean_" + acc_key] = acc
+    bar.close()
 
     return loss, acc
 
@@ -227,8 +231,8 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
             model.load_state_dict(best_model)
 
         # Print metric messages
-        print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
-        print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
+        # print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
+        # print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
         print("-"*60)
 
         if sanity_check:
