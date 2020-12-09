@@ -127,6 +127,7 @@ def epoch_loss(model, criterion, metric, dataloader, device,
 
     status["mean_" + loss_key] = loss
     status["mean_" + acc_key] = acc
+    bar.set_postfix(status)
     bar.close()
 
     return loss, acc
