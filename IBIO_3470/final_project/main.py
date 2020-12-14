@@ -9,7 +9,7 @@ def setup_project():
     if os.path.exists("data") and os.path.exists("models"):
         return
     data_id = "1PmvVHpU8OdKozF34tpxz-OORpW-ghqZe"
-    gen.download_file_from_google_drive(data_id, "data.zip", size=35.87e3)
+    gen.download_file_from_google_drive(data_id, "data.zip", size=6.4e3)
     model_id = "1qrq9SRWasvsi7_UMFRnzYljDbM0XFSqL"
     gen.download_file_from_google_drive(model_id, "model.npy", 
                                         dst="models", size=986e3)
