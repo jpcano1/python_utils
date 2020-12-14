@@ -3,8 +3,7 @@ from torch import nn
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=3, 
                  stride=1, padding=1, padding_mode="zeros", bias=True,
-                 bn=True, activation=None, activation_params=None, 
-                 *args, **kwargs):
+                 bn=True, activation=None, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels.
@@ -26,14 +25,6 @@ class ConvBlock(nn.Module):
                                padding=padding)
         layers.append(conv_layer)
 
-        # Activation Layer
-        if activation:
-            assert activation_params is not None
-            if activation_params:
-                activation = activation(**activation_params)
-            else:
-                activation = activation()
-            layers.append(activation)
         # Batch Normalization Layer
         if bn:
             if kwargs.get("bn_params"):
@@ -44,6 +35,15 @@ class ConvBlock(nn.Module):
                 bn_layer = nn.BatchNorm2d(out_channels)
             layers.append(bn_layer)
 
+        # Activation Layer
+        if activation:
+            if kwargs.get("activation_params"):
+                assert isinstance(kwargs.get("activation_params"), dict)
+                activation = activation(**kwargs.get("activation_params"))
+            else:
+                activation = activation()
+            layers.append(activation)
+            
         self.conv_block = nn.Sequential(*layers)
         del layers
 
