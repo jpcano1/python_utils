@@ -2,6 +2,7 @@
 ## Colaborators:
 - [Juan Pablo Cano](https://github.com/jpcano1)
 - [Carlos Andrés Salazar Aroca](https://github.com/casalazara)
+- [Juan Diego Camacho Daza](https://github.com/jdcamachod)
 
 ### **Setup General Functions**
 ```python
