@@ -86,7 +86,6 @@ class UpBlock(nn.Module):
         x = torch.cat((last_block, down_block), dim=1)
         return self.conv_block(x)
 
-
 """
 Recurrent Layers
 """
