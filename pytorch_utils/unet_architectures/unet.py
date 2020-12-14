@@ -3,8 +3,8 @@ from .general_layers import ConvBlock
 from .layers import UpBlock, DownBlock
 
 class UNet(nn.Module):
-    def __init__(self, in_channels, out_channels, init_filters, depth, 
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, init_filters, 
+                 depth, output_activation=nn.Sigmoid, *args, **kwargs):
         """
         The unet method for generic creation
         :param in_channels: The number of in channels
@@ -66,9 +66,11 @@ class UNet(nn.Module):
         self.up_blocks = nn.ModuleList(up_blocks)
 
         # Final layer
-        self.final_layer = ConvBlock(current_filters, out_channels, padding=0, 
-                                     activation=nn.Sigmoid(), kernel_size=1,
-                                     bn=True)
+        self.final_layer = ConvBlock(
+            current_filters, out_channels, padding=0, 
+            activation=output_activation, kernel_size=1,
+            bn=True
+        )
         
     def forward(self, x):
         """
