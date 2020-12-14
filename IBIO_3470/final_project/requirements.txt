@@ -1,0 +1,7 @@
+scikit-learn
+scikit-image
+requests
+matplotlib
+numpy
+pandas
+tqdm
