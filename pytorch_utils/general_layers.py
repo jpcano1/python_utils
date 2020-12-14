@@ -2,7 +2,8 @@ from torch import nn
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=3, 
-                 stride=1, padding=1, padding_mode="zeros", bias=False,
+                 stride=1, padding=1, padding_mode="zeros", bias=True,
+                 bn=True, activation=None, activation_params=None, 
                  *args, **kwargs):
         """
         Initializer method
@@ -13,27 +14,38 @@ class ConvBlock(nn.Module):
         :param kwargs: Function Keyword arguments
         """
         super(ConvBlock, self).__init__()
-        # Activation Function
 
-        if kwargs.get("activation"):
-            activation = kwargs.get("activation")
-        else:
-            activation = nn.LeakyReLU(0.2,
-                                      inplace=True)
+        layers = []
 
-        self.conv_block = nn.Sequential(
-            # Convolutional Layer
-            nn.Conv2d(in_channels=in_channels, 
-                      out_channels=out_channels, 
-                      kernel_size=kernel_size, 
-                      stride=stride, 
-                      padding_mode=padding_mode, 
-                      padding=padding, bias=bias),
-            # Batch Normalization Layer
-            nn.BatchNorm2d(out_channels),
-            # Activation Layer
-            activation
-        )
+        # Conv Layer
+        conv_layer = nn.Conv2d(in_channels=in_channels, 
+                               out_channels=out_channels, 
+                               kernel_size=kernel_size, 
+                               stride=stride, bias=bias, 
+                               padding_mode=padding_mode, 
+                               padding=padding)
+        layers.append(conv_layer)
+
+        # Activation Layer
+        if activation:
+            assert activation_params is not None
+            if activation_params:
+                activation = activation(**activation_params)
+            else:
+                activation = activation()
+            layers.append(activation)
+        # Batch Normalization Layer
+        if bn:
+            if kwargs.get("bn_params"):
+                assert isinstance(kwargs.get("bn_params"), dict)
+                bn_layer = nn.BatchNorm2d(out_channels, 
+                                          **kwargs.get("bn_params"))
+            else:
+                bn_layer = nn.BatchNorm2d(out_channels)
+            layers.append(bn_layer)
+
+        self.conv_block = nn.Sequential(*layers)
+        del layers
 
     def forward(self, x):
         """
