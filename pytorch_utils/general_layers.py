@@ -6,11 +6,17 @@ class ConvBlock(nn.Module):
                  bn=True, activation=None, *args, **kwargs):
         """
         Initializer method
-        :param in_channels: The number of in channels.
+        :param in_channels: The number of in channels
         :param out_channels: The number of out channels
-        :param padding: The padding size
-        :param args: Function arguments
-        :param kwargs: Function Keyword arguments
+        :param kernel_size: The kernel size of the convolution
+        :param stride: The stride of the convolution
+        :param padding: The padding size of the convolution
+        :param padding_mode: The mode the padding is executed
+        :param bias: The bias neuron
+        :param bn: Boolean to add Batch Normalization layer
+        :param activation: The activation layer
+        :param args: Function Arguments
+        :param kwargs: Function keyword arguments
         """
         super(ConvBlock, self).__init__()
 

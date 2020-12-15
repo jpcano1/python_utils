@@ -70,6 +70,8 @@ def epoch_loss(model, criterion, metric, dataloader, device,
                sanity_check=False, opt=None, epoch=None, **kwargs):
     """
     The loss per epoch
+    :param epoch: The current epoch the loss is
+    running
     :param model: The model to be trained
     :param criterion: The loss function
     :param metric: The metric function

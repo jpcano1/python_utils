@@ -4,6 +4,7 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5,
             reduction="mean", *args, **kwargs):
     """
     Intersection over Union metric
+    :param reduction: The reduction type
     :param y_pred: The predictions of the model
     :param y_true: The true labels of the data
     :param dim: The axis where we calculate the operations
@@ -30,6 +31,7 @@ def dice(y_pred, y_true, dim=(2, 3), eps=1e-5,
          reduction="mean", *args, **kwargs):
     """
     Dice Similarity metric, Sørensen index
+    :param reduction: The reduction type
     :param y_pred: The predictions of the model
     :param y_true: The true labels of the data
     :param dim: The axis where we calculate the operations

@@ -242,7 +242,7 @@ class RRDownBlock(nn.Module):
         return out
 
 class RRUpBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, jump=2,
+    def __init__(self, in_channels, out_channels,
                  *args, **kwargs):
         """
         Initializer method
@@ -292,48 +292,85 @@ class AttentionBlock(nn.Module):
     def __init__(self, in_channels, gating_channels, 
                  inter_channels, sub_sample_factor=2, 
                  *args, **kwargs):
+        """
+        Initializer method
+        :param in_channels: The number of in channels
+        :param gating_channels: The number of channels
+        from the gating signal
+        :param inter_channels: The number of inter channels
+        :param sub_sample_factor: The factor of subsampling
+        theta convolution
+        :param args: Function arguments
+        :param kwargs: Function keyword arguments
+        """
         super(AttentionBlock, self).__init__()
 
         sub_sample_kernel = sub_sample_factor
 
+        # Theta convolution for down convolution
         self.theta = ConvBlock(
             in_channels=in_channels, out_channels=inter_channels, 
             kernel_size=sub_sample_kernel, stride=sub_sample_factor, 
             padding=0, bias=False, bn=False
         )
 
+        # The phi convolution for the gating signal
         self.phi = ConvBlock(
             in_channels=gating_channels, out_channels=inter_channels, 
             kernel_size=1, stride=1, padding=0, bn=False
         )
 
+        # The psi convolution for the conjuction of the
+        # last convolutions
         self.psi = ConvBlock(
             in_channels=inter_channels, out_channels=1, kernel_size=1, 
             stride=1, padding=0, bn=False
         )
 
+        # Final transformation for the psi
+        # and x conjunction
         self.out_transform = ConvBlock(
             in_channels=in_channels, out_channels=in_channels, 
             kernel_size=1, stride=1, padding=0
         )
 
     def forward(self, x, g):
+        """
+        The forward method
+        :param x: The x tensor from the down convolution
+        :param g: The tensor from the gating signal
+        :return: The attention transformed tensor
+        """
         x_shape = x.shape
 
+        # Theta convolution
         theta_x = self.theta(x)
+        # Phi convolution
         phi_g = self.phi(g)
         f = F.relu(theta_x + phi_g, inplace=True)
 
+        # The psi convolution
         sigm_psi_f = torch.sigmoid(self.psi(f))
 
+        # Interpolation for conjunction
         sigm_psi_f = F.interpolate(sigm_psi_f, size=x_shape[2:], 
                                    mode="bilinear", align_corners=True)
+        # Conjunction
         y = sigm_psi_f.expand_as(x) * x
         return self.out_transform(y)
 
 class AttentionUpBlock(nn.Module):
     def __init__(self, last_channels, down_channels, out_channels, 
                  jump=2, *args, **kwargs):
+        """
+
+        :param last_channels:
+        :param down_channels:
+        :param out_channels:
+        :param jump:
+        :param args:
+        :param kwargs:
+        """
         super(AttentionUpBlock, self).__init__()
         layers = []
         self.gating = ConvBlock(
@@ -361,6 +398,12 @@ class AttentionUpBlock(nn.Module):
         self.conv_block = nn.Sequential(*layers)
 
     def forward(self, down_block, last_block):
+        """
+
+        :param down_block:
+        :param last_block:
+        :return:
+        """
         gating_x = self.gating(last_block)
         attention_x = self.attention(down_block, gating_x)
         last_block = self.upsample(last_block)

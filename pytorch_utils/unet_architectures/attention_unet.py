@@ -6,6 +6,16 @@ from .layers import AttentionUpBlock, DownBlock
 class AttentionUNet(nn.Module):
     def __init__(self, in_channels, out_channels, init_filters,
                  depth, output_activation=nn.Sigmoid, *args, **kwargs):
+        """
+
+        :param in_channels:
+        :param out_channels:
+        :param init_filters:
+        :param depth:
+        :param output_activation:
+        :param args:
+        :param kwargs:
+        """
         super(AttentionUNet, self).__init__()
 
         assert depth > 1
@@ -52,6 +62,11 @@ class AttentionUNet(nn.Module):
         )
 
     def forward(self, x):
+        """
+
+        :param x:
+        :return:
+        """
         x = self.init_layer(x)
 
         down_blocks = []
