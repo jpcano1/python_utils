@@ -355,31 +355,38 @@ class AttentionBlock(nn.Module):
         # Interpolation for conjunction
         sigm_psi_f = F.interpolate(sigm_psi_f, size=x_shape[2:], 
                                    mode="bilinear", align_corners=True)
-        # Conjunction
+        # Conjunction between psi tensor and down conv tensor
         y = sigm_psi_f.expand_as(x) * x
         return self.out_transform(y)
 
 class AttentionUpBlock(nn.Module):
-    def __init__(self, last_channels, down_channels, out_channels, 
-                 jump=2, *args, **kwargs):
+    def __init__(self, last_channels, down_channels, out_channels,
+                 *args, **kwargs):
         """
-
-        :param last_channels:
-        :param down_channels:
-        :param out_channels:
-        :param jump:
-        :param args:
-        :param kwargs:
+        Initializer method
+        :param last_channels: The number of channels from the last convolution
+        :param down_channels: The number of channels from the down convolution
+        :param out_channels: The out channels from the up block
+        :param args: Function arguments
+        :param kwargs: Function keyword arguments
         """
         super(AttentionUpBlock, self).__init__()
+
+        # The number of convolutions before max pooling
+        jump = kwargs.get("jump") or 2
+
+         # List of layers
         layers = []
+        # Gating convolution
         self.gating = ConvBlock(
             in_channels=last_channels, 
             out_channels=last_channels // 2, *args, **kwargs
         )
 
+        # Upsampling layer
         self.upsample = UpsampleBlock(*args, **kwargs)
 
+        # Attention block
         self.attention = AttentionBlock(
             in_channels=last_channels // 2, 
             gating_channels=down_channels, 
@@ -387,6 +394,7 @@ class AttentionUpBlock(nn.Module):
             *args, **kwargs
         )
 
+        # Convolutional layer
         layer = ConvBlock(last_channels + down_channels, 
                           out_channels, *args, **kwargs)
         layers.append(layer)
@@ -399,13 +407,16 @@ class AttentionUpBlock(nn.Module):
 
     def forward(self, down_block, last_block):
         """
-
-        :param down_block:
-        :param last_block:
-        :return:
+        Forward method
+        :param down_block: The tensor from the down block
+        :param last_block: The tensor from the last block
+        :return: the tensor forwarded
         """
+        # The gating tensor
         gating_x = self.gating(last_block)
+        # Attention tensor
         attention_x = self.attention(down_block, gating_x)
+        # Upsample tensor
         last_block = self.upsample(last_block)
         x = torch.cat((last_block, attention_x), dim=1)
         return self.conv_block(x)
