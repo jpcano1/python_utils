@@ -2,6 +2,7 @@ from .general_layers import ConvBlock, UpsampleBlock
 
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 class DownBlock(nn.Module):
     def __init__(self, in_channels, out_channels,
@@ -19,7 +20,7 @@ class DownBlock(nn.Module):
         layers = []
 
         # The number of convolutions per block
-        jump = kwargs.get("jump") or 1
+        jump = kwargs.get("jump") or 2
 
         # The initial layer of the jump loop
         init_layer = ConvBlock(in_channels, out_channels, 
@@ -56,7 +57,7 @@ class UpBlock(nn.Module):
         """
         super(UpBlock, self).__init__()
 
-        jump = kwargs.get("jump") or 1
+        jump = kwargs.get("jump") or 2
         layers = []
 
         # The upsampling layer
@@ -129,7 +130,7 @@ class RecurrentDownBlock(nn.Module):
         layers = []
 
         # The number of convolutions per block
-        jump = kwargs.get("jump") or 1
+        jump = kwargs.get("jump") or 2
 
         # The initial layer of the jump loop
         init_layer = ConvBlock(in_channels, out_channels, 
@@ -166,7 +167,7 @@ class RecurrentUpBlock(nn.Module):
         """
         super(RecurrentUpBlock, self).__init__()
 
-        jump = kwargs.get("jump") or 1
+        jump = kwargs.get("jump") or 2
         layers = []
 
         # The upsampling layer
@@ -252,7 +253,7 @@ class RRUpBlock(nn.Module):
         """
         super(RRUpBlock, self).__init__()
 
-        jump = kwargs.get("jump") or 1
+        jump = kwargs.get("jump") or 2
         layers = []
 
         # The upsampling layer
@@ -283,3 +284,85 @@ class RRUpBlock(nn.Module):
         x2 = self.recurrent_block(x1)
         out = x1 + x2
         return out
+
+"""
+Attention Blocks
+"""
+class AttentionBlock(nn.Module):
+    def __init__(self, in_channels, gating_channels, 
+                 inter_channels, sub_sample_factor=2, 
+                 *args, **kwargs):
+        super(AttentionBlock, self).__init__()
+
+        sub_sample_kernel = sub_sample_factor
+
+        self.theta = ConvBlock(
+            in_channels=in_channels, out_channels=inter_channels, 
+            kernel_size=sub_sample_kernel, stride=sub_sample_factor, 
+            padding=0, bias=False, bn=False
+        )
+
+        self.phi = ConvBlock(
+            in_channels=gating_channels, out_channels=inter_channels, 
+            kernel_size=1, stride=1, padding=0, bn=False
+        )
+
+        self.psi = ConvBlock(
+            in_channels=inter_channels, out_channels=1, kernel_size=1, 
+            stride=1, padding=0, bn=False
+        )
+
+        self.out_transform = ConvBlock(
+            in_channels=in_channels, out_channels=in_channels, 
+            kernel_size=1, stride=1, padding=0
+        )
+
+    def forward(self, x, g):
+        x_shape = x.shape
+
+        theta_x = self.theta(x)
+        phi_g = self.phi(g)
+        f = F.relu(theta_x + phi_g, inplace=True)
+
+        sigm_psi_f = torch.sigmoid(self.psi(f))
+
+        sigm_psi_f = F.interpolate(sigm_psi_f, size=x_shape[2:], 
+                                   mode="bilinear", align_corners=True)
+        y = sigm_psi_f.expand_as(x) * x
+        return self.out_transform(y)
+
+class AttentionUpBlock(nn.Module):
+    def __init__(self, last_channels, down_channels, out_channels, 
+                 jump=2, *args, **kwargs):
+        super(AttentionUpBlock, self).__init__()
+        layers = []
+        self.gating = ConvBlock(
+            in_channels=last_channels, 
+            out_channels=last_channels // 2, *args, **kwargs
+        )
+
+        self.upsample = UpsampleBlock(*args, **kwargs)
+
+        self.attention = AttentionBlock(
+            in_channels=last_channels // 2, 
+            gating_channels=down_channels, 
+            inter_channels=last_channels // 2, 
+            *args, **kwargs
+        )
+
+        layer = ConvBlock(last_channels + down_channels, 
+                          out_channels, *args, **kwargs)
+        layers.append(layer)
+
+        for _ in range(jump - 1):
+            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
+            layers.append(layer)
+        
+        self.conv_block = nn.Sequential(*layers)
+
+    def forward(self, down_block, last_block):
+        gating_x = self.gating(last_block)
+        attention_x = self.attention(down_block, gating_x)
+        last_block = self.upsample(last_block)
+        x = torch.cat((last_block, attention_x), dim=1)
+        return self.conv_block(x)
