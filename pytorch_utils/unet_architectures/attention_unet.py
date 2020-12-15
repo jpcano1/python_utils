@@ -7,14 +7,14 @@ class AttentionUNet(nn.Module):
     def __init__(self, in_channels, out_channels, init_filters,
                  depth, output_activation=nn.Sigmoid, *args, **kwargs):
         """
-
-        :param in_channels:
-        :param out_channels:
-        :param init_filters:
-        :param depth:
-        :param output_activation:
-        :param args:
-        :param kwargs:
+        Initializer method
+        :param in_channels: The number of in channels
+        :param out_channels: The number of out channels
+        :param init_filters: The unmebr of initial filters
+        :param depth: The depth of the network
+        :param output_activation: The output function activation
+        :param args: Function arguments
+        :param kwargs: Functions keyword arguments
         """
         super(AttentionUNet, self).__init__()
 

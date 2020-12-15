@@ -32,3 +32,8 @@ def setup_architecture(architecture="unet"):
         r2unet_path = "pytorch_utils/unet_architectures/r2unet.py"
         setup_general.download_github_content(r2unet_path, "utils/r2unet.py")
         print("R2U-Net Enabled")
+
+    if architecture == "attention" or "attention" in architecture:
+        attention_path = "pytorch_utils/unet_architectures/attention_unet.py"
+        setup_general.download_github_content(attention_path, "utils/attention_unet.py")
+        print("Attention U-Net Enabled")
