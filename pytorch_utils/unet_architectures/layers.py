@@ -380,7 +380,8 @@ class AttentionUpBlock(nn.Module):
         # Gating convolution
         self.gating = ConvBlock(
             in_channels=last_channels, 
-            out_channels=last_channels // 2, *args, **kwargs
+            out_channels=last_channels // 2, 
+            *args, **kwargs
         )
 
         # Upsampling layer
@@ -400,7 +401,8 @@ class AttentionUpBlock(nn.Module):
         layers.append(layer)
 
         for _ in range(jump - 1):
-            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
+            layer = ConvBlock(out_channels, out_channels, 
+                              *args, **kwargs)
             layers.append(layer)
         
         self.conv_block = nn.Sequential(*layers)
