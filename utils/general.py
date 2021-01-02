@@ -23,6 +23,8 @@ def read_listdir(dir_):
     full_dirs = list()
     for d in listdir:
         # Concatenate each dir
+        if isinstance(d, bytes):
+            d = d.decode("utf-8")
         full_dir = os.path.join(dir_, d)
         full_dirs.append(full_dir)
     return np.sort(full_dirs)
