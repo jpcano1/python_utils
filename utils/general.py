@@ -52,14 +52,18 @@ def extract_file(filename: str, dst=None):
     if filename.endswith(".zip"):
         flag = True
         with zipfile.ZipFile(filename) as zfile:
-            print("\nExtracting Zip File...")
-            zfile.extractall(dst)
+            bar = tqdm(zfile.namelist())
+            bar.set_description("Extracting File")
+            for file_ in bar:
+                zfile.extract(file_, dst)
             zfile.close()
     elif ".tar" in filename:
         flag = True
         with tarfile.open(filename, "r") as tfile:
-            print("\nExtracting Tar File...")
-            tfile.extractall(dst)
+            bar = tqdm(tfile.getnames())
+            bar.set_description("Extracting File")
+            for file_ in bar:
+                tfile.extract(file_, dst)
             tfile.close()
     if flag:
         print("Deleting File...")
