@@ -20,7 +20,7 @@ class DownBlock(nn.Module):
         layers = []
 
         # The number of convolutions per block
-        jump = kwargs.get("jump") or 2
+        jump = kwargs.get("jump", 2)
 
         # The initial layer of the jump loop
         init_layer = ConvBlock(in_channels, out_channels, 
@@ -57,7 +57,7 @@ class UpBlock(nn.Module):
         """
         super(UpBlock, self).__init__()
 
-        jump = kwargs.get("jump") or 2
+        jump = kwargs.get("jump", 2)
         layers = []
 
         # The upsampling layer
@@ -99,7 +99,7 @@ class RecurrentConvBlock(nn.Module):
         :param kwargs: Function Keyword arguments
         """
         super(RecurrentConvBlock, self).__init__()
-        self.t = kwargs.get("t") or 2
+        self.t = kwargs.get("t", 2)
         self.conv_block = ConvBlock(in_channels, in_channels, 
                                     *args, **kwargs)
 
@@ -130,7 +130,7 @@ class RecurrentDownBlock(nn.Module):
         layers = []
 
         # The number of convolutions per block
-        jump = kwargs.get("jump") or 2
+        jump = kwargs.get("jump", 2)
 
         # The initial layer of the jump loop
         init_layer = ConvBlock(in_channels, out_channels, 
@@ -167,7 +167,7 @@ class RecurrentUpBlock(nn.Module):
         """
         super(RecurrentUpBlock, self).__init__()
 
-        jump = kwargs.get("jump") or 2
+        jump = kwargs.get("jump", 2)
         layers = []
 
         # The upsampling layer
@@ -253,7 +253,7 @@ class RRUpBlock(nn.Module):
         """
         super(RRUpBlock, self).__init__()
 
-        jump = kwargs.get("jump") or 2
+        jump = kwargs.get("jump", 2)
         layers = []
 
         # The upsampling layer
@@ -373,7 +373,7 @@ class AttentionUpBlock(nn.Module):
         super(AttentionUpBlock, self).__init__()
 
         # The number of convolutions before max pooling
-        jump = kwargs.get("jump") or 2
+        jump = kwargs.get("jump", 2)
 
          # List of layers
         layers = []

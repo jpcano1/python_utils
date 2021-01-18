@@ -27,7 +27,7 @@ def loss_func(y_pred, y_true, metric, **kwargs):
     :param metric: The metric of the model
     :return: The loss calculated and the metric
     """
-    reduction = kwargs.get("reduction") or "mean"
+    reduction = kwargs.get("reduction", "mean")
 
     assert reduction in ["sum", "mean"], "Reduction non valid"
 
@@ -190,8 +190,8 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
 
     # Best parameters
     best_model = copy.deepcopy(model.state_dict())
-    best_loss = kwargs.get("best_loss") or float("inf")
-    best_acc = kwargs.get("best_acc") or 0
+    best_loss = kwargs.get("best_loss", float("inf"))
+    best_acc = kwargs.get("best_acc", 0)
 
     # Loop through the epochs
     for epoch in tqdm(range(epochs)):

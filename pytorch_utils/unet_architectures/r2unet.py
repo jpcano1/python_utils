@@ -25,8 +25,8 @@ class R2UNet(nn.Module):
         up_blocks = []
 
         # Keyword arguments
-        pool_size = kwargs.get("pool_size") or 2
-        pool_stride = kwargs.get("pool_stride") or 2
+        pool_size = kwargs.get("pool_size", 2)
+        pool_stride = kwargs.get("pool_stride", 2)
         
         # Initial Layer
         self.init_layer = ConvBlock(in_channels, init_filters, 
