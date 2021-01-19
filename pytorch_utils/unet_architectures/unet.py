@@ -57,7 +57,7 @@ class UNet(nn.Module):
         for _ in range(depth - 1):
             # Create the up block
             up_block = UpBlock(current_filters + current_filters // 2,
-                            current_filters // 2, *args, **kwargs)
+                               current_filters // 2, *args, **kwargs)
             up_blocks.append(up_block)
             current_filters //= 2
 
