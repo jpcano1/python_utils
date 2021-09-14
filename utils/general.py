@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import zipfile
 import tarfile
 import pickle
+from typing import List, Tuple
 
 """
 OS Functions
@@ -29,7 +30,7 @@ def read_listdir(dir_):
         full_dirs.append(full_dir)
     return np.sort(full_dirs)
 
-def create_and_verify(*args, list_=False):
+def create_and_verify(*args: List[str], list_=False):
     """
     Function that creates a directory and verifies
     its existence
@@ -47,7 +48,7 @@ def create_and_verify(*args, list_=False):
     else:
         raise FileNotFoundError("La ruta no existe")
 
-def extract_file(filename: str, dst=None):
+def extract_file(filename: str, dst: str = None):
     flag = False
     if filename.endswith(".zip"):
         flag = True
@@ -56,7 +57,6 @@ def extract_file(filename: str, dst=None):
             bar.set_description("Extracting File")
             for file_ in bar:
                 zfile.extract(file_, dst)
-            zfile.close()
     elif ".tar" in filename:
         flag = True
         with tarfile.open(filename, "r") as tfile:
@@ -64,22 +64,22 @@ def extract_file(filename: str, dst=None):
             bar.set_description("Extracting File")
             for file_ in bar:
                 tfile.extract(file_, dst)
-            tfile.close()
     if flag:
         print("Deleting File...")
         os.remove(filename)
 
-def unpickle(filename):
+def unpickle(filename: str):
     with open(filename, "rb") as fo:
         pickle_data = pickle.load(fo, encoding='bytes')
-        fo.close()
     return pickle_data
 
 """
 DataViz Functions
 """
-def imshow(img, title=None, color=True, cmap="gray", 
-            axis=False, ax=None):
+def imshow(
+    img: np.ndarray, title: str = None, color: bool = True, 
+    cmap: str = "gray", axis: bool = False, ax: plt.Axes = None
+):
     if not ax:
         ax = plt
     # Plot Image
@@ -96,8 +96,11 @@ def imshow(img, title=None, color=True, cmap="gray",
     if title:
         ax.title(title)
 
-def visualize_subplot(imgs: list, titles: list, 
-                    division: tuple, figsize: tuple=None, cmap="gray"):
+def visualize_subplot(
+    imgs: List[np.ndarray], titles: List[str], 
+    division: Tuple[int], figsize: Tuple[int] = None, 
+    cmap: str = "gray"
+):
     """
     An even more complex function to plot multiple images in one or
     two axis
@@ -133,10 +136,10 @@ def visualize_subplot(imgs: list, titles: list,
 """
 Miscellaneous Functions
 """
-def download_content(url, filename, dst="./data", chnksz=1000):
+def download_content(url: str, filename: str, dst: str = "./data", chnksz: int = 1000):
     try:
         r = requests.get(url, stream=True)
-    except Exception as e:
+    except Exception as _:
         print("Error de conexión con el servidor")
         sys.exit()
         
@@ -154,24 +157,27 @@ def download_content(url, filename, dst="./data", chnksz=1000):
 
         for pkg in tqdm(gen, total=total, unit="KB"):
             f.write(pkg)
-        f.close()
         r.close()
     
     extract_file(full_path, dst)
 
-def download_file_from_google_drive(id_, filename, dst="./data", size=None,
-                                    chnksz=1000):
+def download_file_from_google_drive(
+    id_: str, filename: str, dst: str = "./data", 
+    size: float = 0, chnksz: int = 1000
+):
     """
     Retrieved and Improved from https://stackoverflow.com/a/39225039
     """
-    def get_confirm_token(response):
+    def get_confirm_token(response: requests.Response) -> str:
         for key, value in response.cookies.items():
             if key.startswith('download_warning'):
                 return value
         return None
 
-    def save_response_content(response, filename, dst, size=None,
-                              chnksz=1000):
+    def save_response_content(
+        response: requests.Response, filename: str, dst: str, size: float = 0,
+        chnksz: int = 1000
+    ):
         full_path = os.path.join(dst, filename)
         if not os.path.exists(dst):
             os.makedirs(dst)
@@ -180,7 +186,6 @@ def download_file_from_google_drive(id_, filename, dst="./data", size=None,
             for chunk in tqdm(gen, total=size, unit="KB"):
                 if chunk: # filter out keep-alive new chunks
                     f.write(chunk)
-            f.close()
 
     url = "https://docs.google.com/uc?export=download"
     session = requests.Session()
@@ -198,18 +203,20 @@ def download_file_from_google_drive(id_, filename, dst="./data", size=None,
     full_path = os.path.join(dst, filename)
 
     extract_file(full_path, dst)
-    return
 
 """
 Data Scalers
 """
-def scale(img, min_, max_, dtype="uint8"):
+def scale(
+    img: np.ndarray, min_: float, 
+    max_: float, dtype: str = "uint8"
+) -> np.ndarray:
     img_min = img.min()
     img_max = img.max()
     m = (max_ - min_) / (img_max - img_min)
     return (m * (img - img_min) + min_).astype(dtype)
 
-def std_scaler(img, eps=1e-5):
+def std_scaler(img: np.ndarray, eps: float = 1e-5) -> np.ndarray:
     mean = img.mean()
     var = img.var()
     return (img - mean) / np.sqrt(var + eps)

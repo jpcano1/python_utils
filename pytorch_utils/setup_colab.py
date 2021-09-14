@@ -3,8 +3,8 @@ import os
 
 def setup_unet(architecture="unet"):
     os.makedirs("train_utils", exist_ok=True)
-    with open("train_utils/__init__.py", "wb") as f:
-        f.close()
+    with open("train_utils/__init__.py", "wb") as _:
+        ...
     setup_general.setup_general()
     metrics_path = "pytorch_utils/train_utils/metrics.py"
     train_loop_path = "pytorch_utils/train_utils/seg_train_loops.py"
