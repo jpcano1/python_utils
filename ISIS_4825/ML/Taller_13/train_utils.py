@@ -1,15 +1,12 @@
+from collections import OrderedDict
 import copy
-
-from torch.nn import functional as F
-import torch
-
-from tqdm.auto import tqdm
-
 import numpy as np
+import torch
+from torch.nn import functional as F
+from tqdm.auto import tqdm
 
 from . import general as gen
 
-from collections import OrderedDict
 
 def get_lr(opt):
     """
@@ -20,6 +17,7 @@ def get_lr(opt):
     # Loop through the opt params
     for param_group in opt.param_groups:
         return param_group['lr']
+
 
 def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
     """
@@ -40,6 +38,7 @@ def jaccard(y_pred, y_true, dim=(2, 3), eps=1e-5):
     loss = 1 - IoU
     return loss, IoU
 
+
 def loss_func(y_pred, y_true, metric):
     """
     The loss function calculator
@@ -50,13 +49,13 @@ def loss_func(y_pred, y_true, metric):
     """
     # We take the binary cross-entropy
     # for binary classification
-    bce = F.binary_cross_entropy(y_pred, y_true, 
-                                 reduction="mean")
+    bce = F.binary_cross_entropy(y_pred, y_true, reduction="mean")
     # Loss and metric
     loss, acc = metric(y_pred, y_true)
     # Sum the binary cross-entropy
     loss += bce
     return loss, acc
+
 
 def batch_loss(criterion, y_pred, y_true, metric, opt=None):
     """
@@ -83,8 +82,10 @@ def batch_loss(criterion, y_pred, y_true, metric, opt=None):
     # Return the numbers of the loss and the metric
     return loss.item(), acc.item()
 
-def epoch_loss(model, criterion, metric, dataloader, device,
-               sanity_check=False, opt=None, epoch=None):
+
+def epoch_loss(
+    model, criterion, metric, dataloader, device, sanity_check=False, opt=None, epoch=None
+):
     """
     The loss per epoch
     :param model: The model to be trained
@@ -96,8 +97,8 @@ def epoch_loss(model, criterion, metric, dataloader, device,
     :param opt: The optimizer of the model
     :return: The loss and the metric per epoch
     """
-    epoch_loss = 0.
-    epoch_acc = 0.
+    epoch_loss = 0.0
+    epoch_acc = 0.0
 
     len_data = len(dataloader)
 
@@ -125,19 +126,18 @@ def epoch_loss(model, criterion, metric, dataloader, device,
         y_pred = model(X_batch)
 
         # Calculate the batch loss
-        b_loss, b_acc = batch_loss(criterion, y_pred, 
-                                   y_batch, metric, opt)
+        b_loss, b_acc = batch_loss(criterion, y_pred, y_batch, metric, opt)
         epoch_loss += b_loss
         epoch_acc += b_acc
 
         # Update bar status
         status[loss_key] = b_loss
-        status[acc_key] = b_acc * 100.
+        status[acc_key] = b_acc * 100.0
 
         bar.set_postfix(status)
         if sanity_check:
             break
-    
+
     bar.close()
     # Calculate the mean
     loss = epoch_loss / float(len_data)
@@ -145,8 +145,8 @@ def epoch_loss(model, criterion, metric, dataloader, device,
 
     return loss, acc
 
-def evaluate(model, criterion, dataloader, device, 
-             sanity_check, metric=jaccard):
+
+def evaluate(model, criterion, dataloader, device, sanity_check, metric=jaccard):
     """
     Method that evaluates the model on a dataloader
     :param model: The model to e evaluated
@@ -163,13 +163,24 @@ def evaluate(model, criterion, dataloader, device,
     # Deactivate the PyTorch AutoGrad
     with torch.no_grad():
         # Calculate the validation loss and accuracy
-        loss, acc = epoch_loss(model, criterion, metric,
-                               dataloader, device, sanity_check)
+        loss, acc = epoch_loss(model, criterion, metric, dataloader, device, sanity_check)
     return loss, acc
 
-def train(model, epochs, criterion, opt, train_dl, val_dl, 
-          sanity_check, lr_scheduler, weights_dir, device,
-          metric=jaccard, **kwargs):
+
+def train(
+    model,
+    epochs,
+    criterion,
+    opt,
+    train_dl,
+    val_dl,
+    sanity_check,
+    lr_scheduler,
+    weights_dir,
+    device,
+    metric=jaccard,
+    **kwargs,
+):
     """
     The training loop
     :param model: The model to be trained and evaluated
@@ -187,16 +198,10 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     :return: The best model trained and the history
     """
     # Loss history dictionary
-    loss_history = {
-        "train": [],
-        "val": []
-    }
+    loss_history = {"train": [], "val": []}
 
     # Accuracy history dictionary
-    acc_history = {
-        "train": [],
-        "val": []
-    }
+    acc_history = {"train": [], "val": []}
 
     # Best parameters
     best_model = copy.deepcopy(model.state_dict())
@@ -210,15 +215,14 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
         # Activate all layers
         model.train()
         # Calculate the train loss and accuracy
-        train_loss, train_acc = epoch_loss(model, criterion, metric,
-                                           train_dl, device, sanity_check,
-                                           opt, epoch + 1)
+        train_loss, train_acc = epoch_loss(
+            model, criterion, metric, train_dl, device, sanity_check, opt, epoch + 1
+        )
         # Append to the dictionaries
         loss_history["train"].append(train_loss)
         acc_history["train"].append(train_acc)
 
-        val_loss, val_acc = evaluate(model, criterion, val_dl,
-                                     device, sanity_check)
+        val_loss, val_acc = evaluate(model, criterion, val_dl, device, sanity_check)
 
         # Append to the dictionaries
         loss_history["val"].append(val_loss)
@@ -245,7 +249,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
 
         print(f"Train Loss: {train_loss:.6f}, Accuracy: {100 * train_acc:.2f}")
         print(f"Val loss: {val_loss:.6f}, Accuracy: {100 * val_acc:.2f}")
-        print("-"*50)
+        print("-" * 50)
 
         if sanity_check:
             break
@@ -253,6 +257,7 @@ def train(model, epochs, criterion, opt, train_dl, val_dl,
     # Load best model and return
     model.load_state_dict(best_model)
     return model, loss_history, acc_history
+
 
 class SimpleGenerator:
     def __init__(self, path2data):

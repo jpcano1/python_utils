@@ -1,12 +1,12 @@
-from .general_layers import ConvBlock, UpsampleBlock
-
 import torch
 from torch import nn
 from torch.nn import functional as F
 
+from .general_layers import ConvBlock, UpsampleBlock
+
+
 class DownBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels.
@@ -23,20 +23,18 @@ class DownBlock(nn.Module):
         jump = kwargs.get("jump", 2)
 
         # The initial layer of the jump loop
-        init_layer = ConvBlock(in_channels, out_channels, 
-                               *args, **kwargs)
-        
+        init_layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
+
         layers.append(init_layer)
 
         # Append convolutional blocks if
         # jump is greater than 1
         for _ in range(jump - 1):
-            layer = ConvBlock(out_channels, out_channels, 
-                              *args, **kwargs)
+            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
             layers.append(layer)
 
         self.down_block = nn.Sequential(*layers)
-    
+
     def forward(self, x):
         """
         The forward method
@@ -45,9 +43,9 @@ class DownBlock(nn.Module):
         """
         return self.down_block(x)
 
+
 class UpBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels
@@ -64,18 +62,16 @@ class UpBlock(nn.Module):
         self.upsample = UpsampleBlock(*args, **kwargs)
 
         # The first convolutional layer
-        layer = ConvBlock(in_channels, out_channels, 
-                          *args, **kwargs)
+        layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
         layers.append(layer)
 
         # Append convolutional blocks
         # if jump is greater than 1
         for _ in range(jump - 1):
-            layer = ConvBlock(out_channels, out_channels, 
-                              *args, **kwargs)
+            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
             layers.append(layer)
         self.conv_block = nn.Sequential(*layers)
-    
+
     def forward(self, down_block, last_block):
         """
         The forward method
@@ -87,9 +83,12 @@ class UpBlock(nn.Module):
         x = torch.cat((last_block, down_block), dim=1)
         return self.conv_block(x)
 
+
 """
 Recurrent Layers
 """
+
+
 class RecurrentConvBlock(nn.Module):
     def __init__(self, in_channels, *args, **kwargs):
         """
@@ -100,8 +99,7 @@ class RecurrentConvBlock(nn.Module):
         """
         super(RecurrentConvBlock, self).__init__()
         self.t = kwargs.get("t", 2)
-        self.conv_block = ConvBlock(in_channels, in_channels, 
-                                    *args, **kwargs)
+        self.conv_block = ConvBlock(in_channels, in_channels, *args, **kwargs)
 
     def forward(self, x):
         """
@@ -114,9 +112,9 @@ class RecurrentConvBlock(nn.Module):
             result = self.conv_block(x + result)
         return result
 
+
 class RecurrentDownBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels.
@@ -133,20 +131,18 @@ class RecurrentDownBlock(nn.Module):
         jump = kwargs.get("jump", 2)
 
         # The initial layer of the jump loop
-        init_layer = ConvBlock(in_channels, out_channels, 
-                               *args, **kwargs)
-        
+        init_layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
+
         layers.append(init_layer)
 
         # Append recurrent convolutional
         # blocks if jump is greater than 1
         for _ in range(jump - 1):
-            layer = RecurrentConvBlock(out_channels, 
-                                       *args, **kwargs)
+            layer = RecurrentConvBlock(out_channels, *args, **kwargs)
             layers.append(layer)
 
         self.down_block = nn.Sequential(*layers)
-    
+
     def forward(self, x):
         """
         The forward method
@@ -155,9 +151,9 @@ class RecurrentDownBlock(nn.Module):
         """
         return self.down_block(x)
 
+
 class RecurrentUpBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels
@@ -174,18 +170,16 @@ class RecurrentUpBlock(nn.Module):
         self.upsample = UpsampleBlock(*args, **kwargs)
 
         # The first convolutional layer
-        layer = ConvBlock(in_channels, out_channels, 
-                          *args, **kwargs)
+        layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
         layers.append(layer)
 
         # Append convolutional blocks
         # if jump is greater than 1
         for _ in range(jump - 1):
-            layer = RecurrentConvBlock(out_channels, 
-                                       *args, **kwargs)
+            layer = RecurrentConvBlock(out_channels, *args, **kwargs)
             layers.append(layer)
         self.conv_block = nn.Sequential(*layers)
-    
+
     def forward(self, down_block, last_block):
         """
         The forward method
@@ -197,12 +191,14 @@ class RecurrentUpBlock(nn.Module):
         x = torch.cat((last_block, down_block), dim=1)
         return self.conv_block(x)
 
+
 """
 Recurrent Residual Layers
 """
+
+
 class RRDownBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, jump=2,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, jump=2, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels.
@@ -218,18 +214,16 @@ class RRDownBlock(nn.Module):
         layers = []
 
         # The initial layer of the jump loop
-        self.init_layer = ConvBlock(in_channels, out_channels, 
-                                    *args, **kwargs)
+        self.init_layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
 
         # Append convolutional blocks if
         # jump is greater than 1
         for _ in range(jump - 1):
-            layer = RecurrentConvBlock(out_channels, 
-                                       *args, **kwargs)
+            layer = RecurrentConvBlock(out_channels, *args, **kwargs)
             layers.append(layer)
 
         self.recurrent_block = nn.Sequential(*layers)
-    
+
     def forward(self, x):
         """
         The forward method
@@ -241,9 +235,9 @@ class RRDownBlock(nn.Module):
         out = x1 + x2
         return out
 
+
 class RRUpBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels
@@ -260,17 +254,15 @@ class RRUpBlock(nn.Module):
         self.upsample = UpsampleBlock(*args, **kwargs)
 
         # The first convolutional layer
-        self.init_layer = ConvBlock(in_channels, out_channels, 
-                                    *args, **kwargs)
+        self.init_layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
 
         # Append convolutional blocks
         # if jump is greater than 1
         for _ in range(jump - 1):
-            layer = RecurrentConvBlock(out_channels, 
-                                       *args, **kwargs)
+            layer = RecurrentConvBlock(out_channels, *args, **kwargs)
             layers.append(layer)
         self.recurrent_block = nn.Sequential(*layers)
-    
+
     def forward(self, down_block, last_block):
         """
         The forward method
@@ -285,13 +277,16 @@ class RRUpBlock(nn.Module):
         out = x1 + x2
         return out
 
+
 """
 Attention Blocks
 """
+
+
 class AttentionBlock(nn.Module):
-    def __init__(self, in_channels, gating_channels, 
-                 inter_channels, sub_sample_factor=2, 
-                 *args, **kwargs):
+    def __init__(
+        self, in_channels, gating_channels, inter_channels, sub_sample_factor=2, *args, **kwargs
+    ):
         """
         Initializer method
         :param in_channels: The number of in channels
@@ -309,29 +304,35 @@ class AttentionBlock(nn.Module):
 
         # Theta convolution for down convolution
         self.theta = ConvBlock(
-            in_channels=in_channels, out_channels=inter_channels, 
-            kernel_size=sub_sample_kernel, stride=sub_sample_factor, 
-            padding=0, bias=False, bn=False
+            in_channels=in_channels,
+            out_channels=inter_channels,
+            kernel_size=sub_sample_kernel,
+            stride=sub_sample_factor,
+            padding=0,
+            bias=False,
+            bn=False,
         )
 
         # The phi convolution for the gating signal
         self.phi = ConvBlock(
-            in_channels=gating_channels, out_channels=inter_channels, 
-            kernel_size=1, stride=1, padding=0, bn=False
+            in_channels=gating_channels,
+            out_channels=inter_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            bn=False,
         )
 
         # The psi convolution for the conjuction of the
         # last convolutions
         self.psi = ConvBlock(
-            in_channels=inter_channels, out_channels=1, kernel_size=1, 
-            stride=1, padding=0, bn=False
+            in_channels=inter_channels, out_channels=1, kernel_size=1, stride=1, padding=0, bn=False
         )
 
         # Final transformation for the psi
         # and x conjunction
         self.out_transform = ConvBlock(
-            in_channels=in_channels, out_channels=in_channels, 
-            kernel_size=1, stride=1, padding=0
+            in_channels=in_channels, out_channels=in_channels, kernel_size=1, stride=1, padding=0
         )
 
     def forward(self, x, g):
@@ -353,15 +354,16 @@ class AttentionBlock(nn.Module):
         sigm_psi_f = torch.sigmoid(self.psi(f))
 
         # Interpolation for conjunction
-        sigm_psi_f = F.interpolate(sigm_psi_f, size=x_shape[2:], 
-                                   mode="bilinear", align_corners=True)
+        sigm_psi_f = F.interpolate(
+            sigm_psi_f, size=x_shape[2:], mode="bilinear", align_corners=True
+        )
         # Conjunction between psi tensor and down conv tensor
         y = sigm_psi_f.expand_as(x) * x
         return self.out_transform(y)
 
+
 class AttentionUpBlock(nn.Module):
-    def __init__(self, last_channels, down_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, last_channels, down_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param last_channels: The number of channels from the last convolution
@@ -375,13 +377,11 @@ class AttentionUpBlock(nn.Module):
         # The number of convolutions before max pooling
         jump = kwargs.get("jump", 2)
 
-         # List of layers
+        # List of layers
         layers = []
         # Gating convolution
         self.gating = ConvBlock(
-            in_channels=last_channels, 
-            out_channels=last_channels // 2, 
-            *args, **kwargs
+            in_channels=last_channels, out_channels=last_channels // 2, *args, **kwargs
         )
 
         # Upsampling layer
@@ -389,22 +389,21 @@ class AttentionUpBlock(nn.Module):
 
         # Attention block
         self.attention = AttentionBlock(
-            in_channels=last_channels // 2, 
-            gating_channels=down_channels, 
-            inter_channels=last_channels // 2, 
-            *args, **kwargs
+            in_channels=last_channels // 2,
+            gating_channels=down_channels,
+            inter_channels=last_channels // 2,
+            *args,
+            **kwargs,
         )
 
         # Convolutional layer
-        layer = ConvBlock(last_channels + down_channels, 
-                          out_channels, *args, **kwargs)
+        layer = ConvBlock(last_channels + down_channels, out_channels, *args, **kwargs)
         layers.append(layer)
 
         for _ in range(jump - 1):
-            layer = ConvBlock(out_channels, out_channels, 
-                              *args, **kwargs)
+            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
             layers.append(layer)
-        
+
         self.conv_block = nn.Sequential(*layers)
 
     def forward(self, down_block, last_block):

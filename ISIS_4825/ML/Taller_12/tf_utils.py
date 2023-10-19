@@ -1,6 +1,7 @@
+import numpy as np
 from tensorflow import keras
 from tensorflow.keras import backend as K
-import numpy as np
+
 
 class CustomCallback(keras.callbacks.Callback):
     def __init__(self, weights_dir, patience=10, rate=0.5):
@@ -25,7 +26,7 @@ class CustomCallback(keras.callbacks.Callback):
         self.best_recall = 0
         self.wait = 0
         self.best_weights = None
-    
+
     def on_epoch_end(self, epoch, logs=None):
         """
         Method that is called each time an epoch ends
@@ -37,8 +38,7 @@ class CustomCallback(keras.callbacks.Callback):
         current_loss = logs.get("val_loss")
         # Current validation Recall
         current_recall = logs.get("val_Recall")
-        if (current_loss < self.best_loss or 
-            current_recall > self.best_recall):
+        if current_loss < self.best_loss or current_recall > self.best_recall:
             # We save the model weights
             # We wait again
             # We assign the best loss and the best recall.
@@ -63,6 +63,7 @@ class CustomCallback(keras.callbacks.Callback):
                 self.model.set_weights(self.best_weights)
                 print("\nBest Weights Loaded!!")
 
+
 def DenseBlock(units):
     """
     Function that creates a Dense Layer with BatchNormalization
@@ -70,7 +71,6 @@ def DenseBlock(units):
     :param units: the number of neural units for the Dense Layer
     :return: A Sequential Dense Layer with Batch Normalization
     """
-    return keras.Sequential([
-        keras.layers.Dense(units, activation="relu"),
-        keras.layers.BatchNormalization()
-    ])
+    return keras.Sequential(
+        [keras.layers.Dense(units, activation="relu"), keras.layers.BatchNormalization()]
+    )

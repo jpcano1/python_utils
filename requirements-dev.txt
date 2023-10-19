@@ -1,0 +1,9 @@
+flake8==6.0.*
+pydocstyle==6.2.*
+mypy==0.991
+pytest==7.2.*
+pytest-mock==3.10.*
+pytest-cov==4.0.*
+pre-commit==2.21.*
+jupytext==1.14.*
+black==22.12.*

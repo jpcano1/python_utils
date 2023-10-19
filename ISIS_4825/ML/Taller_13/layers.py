@@ -1,6 +1,7 @@
+import numpy as np
 import torch
 from torch import nn
-import numpy as np
+
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, padding=1, *args, **kwargs):
@@ -28,12 +29,14 @@ class ConvBlock(nn.Module):
         layers = []
 
         # Convolutional layer creation
-        conv2d_layer = nn.Conv2d(in_channels=in_channels, 
-                                out_channels=out_channels, 
-                                kernel_size=kernel_size, 
-                                stride=stride, 
-                                padding_mode=padding_mode, 
-                                padding=padding)
+        conv2d_layer = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding_mode=padding_mode,
+            padding=padding,
+        )
         layers.append(conv2d_layer)
         if bn:
             bn_layer = nn.BatchNorm2d(out_channels)
@@ -51,9 +54,9 @@ class ConvBlock(nn.Module):
         """
         return self.conv_block(x)
 
+
 class UpsampleBlock(nn.Module):
-    def __init__(self, scale_factor=2, mode="bilinear", 
-                 *args, **kwargs):
+    def __init__(self, scale_factor=2, mode="bilinear", *args, **kwargs):
         """
         Initializer method
         :param scale_factor: The factor of upsampling
@@ -66,12 +69,12 @@ class UpsampleBlock(nn.Module):
 
         # Conditional modes
         if mode != "nearest":
-            self.upsample_layer = nn.Upsample(scale_factor=scale_factor, 
-                                              mode=mode, align_corners=True)
+            self.upsample_layer = nn.Upsample(
+                scale_factor=scale_factor, mode=mode, align_corners=True
+            )
         else:
-            self.upsample_layer = nn.Upsample(scale_factor=scale_factor,
-                                              mode=mode)
-            
+            self.upsample_layer = nn.Upsample(scale_factor=scale_factor, mode=mode)
+
     def forward(self, x):
         """
         The forward method
@@ -81,9 +84,9 @@ class UpsampleBlock(nn.Module):
         """
         return self.upsample_layer(x)
 
+
 class DownBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels.
@@ -100,20 +103,18 @@ class DownBlock(nn.Module):
         jump = kwargs.get("jump") or 1
 
         # The initial layer of the jump loop
-        init_layer = ConvBlock(in_channels, out_channels, 
-                               *args, **kwargs)
-        
+        init_layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
+
         layers.append(init_layer)
 
         # Append convolutional blocks if
         # jump is greater than 1
         for _ in range(jump - 1):
-            layer = ConvBlock(out_channels, out_channels, 
-                              *args, **kwargs)
+            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
             layers.append(layer)
 
         self.down_block = nn.Sequential(*layers)
-    
+
     def forward(self, x):
         """
         The forward method
@@ -122,9 +123,9 @@ class DownBlock(nn.Module):
         """
         return self.down_block(x)
 
+
 class UpBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels
@@ -141,18 +142,16 @@ class UpBlock(nn.Module):
         self.upsample = UpsampleBlock(*args, **kwargs)
 
         # The first convolutional layer
-        layer = ConvBlock(in_channels, out_channels, 
-                          *args, **kwargs)
+        layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
         layers.append(layer)
 
         # Append convolutional blocks
         # if jump is greater than 1
         for _ in range(jump - 1):
-            layer = ConvBlock(out_channels, out_channels, 
-                              *args, **kwargs)
+            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
             layers.append(layer)
         self.conv_block = nn.Sequential(*layers)
-    
+
     def forward(self, down_block, last_block):
         """
         The forward method
@@ -163,6 +162,7 @@ class UpBlock(nn.Module):
         last_block = self.upsample(last_block)
         x = torch.cat((last_block, down_block), dim=1)
         return self.conv_block(x)
+
 
 class Encoder(nn.Module):
     def __init__(self, in_channels, init_filters, depth, *args, **kwargs):
@@ -183,8 +183,7 @@ class Encoder(nn.Module):
         jump = kwargs.get("jump") or 1
 
         # First layer
-        init_layer = ConvBlock(in_channels, init_filters, 
-                               *args, **kwargs)
+        init_layer = ConvBlock(in_channels, init_filters, *args, **kwargs)
         layers.append(init_layer)
 
         current_filters = init_filters
@@ -195,24 +194,18 @@ class Encoder(nn.Module):
             # if jump is greater than 1
             for _ in range(jump - 1):
                 # Convolution Block
-                layer = ConvBlock(current_filters,
-                                  current_filters * 2, 
-                                  *args,
-                                  **kwargs)
+                layer = ConvBlock(current_filters, current_filters * 2, *args, **kwargs)
                 # Append Layers
                 layers.append(layer)
 
                 current_filters *= 2
 
             # Pooling Block
-            layer = nn.MaxPool2d(kernel_size=pool_size, 
-                                 stride=pool_stride)
+            layer = nn.MaxPool2d(kernel_size=pool_size, stride=pool_stride)
             layers.append(layer)
 
             # Convolution Block
-            layer = ConvBlock(current_filters,
-                              current_filters * 2, 
-                              *args, **kwargs)
+            layer = ConvBlock(current_filters, current_filters * 2, *args, **kwargs)
             layers.append(layer)
 
             current_filters *= 2
@@ -228,6 +221,7 @@ class Encoder(nn.Module):
         """
         return self.encoder(x)
 
+
 class Decoder(nn.Module):
     def __init__(self, init_filters, out_channels, depth, *args, **kwargs):
         """
@@ -240,39 +234,34 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
         layers = []
 
-        scale_factor = kwargs.get("scale_factor") or 2 
+        scale_factor = kwargs.get("scale_factor") or 2
         mode = kwargs.get("mode") or "bilinear"
 
         jump = kwargs.get("jump") or 1
 
         current_filters = init_filters
 
-        for _ in range(depth - 1):    
+        for _ in range(depth - 1):
             for _ in range(jump - 1):
-                layer = ConvBlock(current_filters,
-                                  current_filters // 2,
-                                  *args, **kwargs)
+                layer = ConvBlock(current_filters, current_filters // 2, *args, **kwargs)
                 layers.append(layer)
 
                 current_filters //= 2
 
             layer = UpsampleBlock(scale_factor=scale_factor, mode=mode)
             layers.append(layer)
-            layer = ConvBlock(current_filters,
-                              current_filters // 2, 
-                              *args, **kwargs)
+            layer = ConvBlock(current_filters, current_filters // 2, *args, **kwargs)
             layers.append(layer)
 
             current_filters //= 2
 
-        layer = ConvBlock(current_filters, out_channels, 
-                          activation=nn.Sigmoid(), *args, **kwargs)
+        layer = ConvBlock(current_filters, out_channels, activation=nn.Sigmoid(), *args, **kwargs)
         layers.append(layer)
         self.decoder = nn.Sequential(*layers)
 
     def forward(self, x):
         """
-        
+
         :param x:
         :type x:
         :return:

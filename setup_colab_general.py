@@ -1,8 +1,9 @@
+import numpy as np
+import os
 import requests
 import sys
 from tqdm.auto import tqdm
-import numpy as np
-import os
+
 
 def download_github_content(path, filename, chnksz=1000):
     """
@@ -13,16 +14,16 @@ def download_github_content(path, filename, chnksz=1000):
     :param chnksz: the chunk size
     """
     url = f"https://raw.githubusercontent.com/jpcano1/python_utils/main/{path}"
-    
+
     try:
         r = requests.get(url, stream=True)
     except Exception as e:
         print(f"Error de conexión con el servidor: {e}")
         sys.exit()
-        
+
     with open(filename, "wb") as f:
         try:
-            total = int(np.ceil(int(r.headers.get("content-length"))/chnksz))
+            total = int(np.ceil(int(r.headers.get("content-length")) / chnksz))
         except ArithmeticError:
             total = 0
 
@@ -34,6 +35,7 @@ def download_github_content(path, filename, chnksz=1000):
         f.close()
         r.close()
     return
+
 
 def setup_general(dst="utils"):
     """

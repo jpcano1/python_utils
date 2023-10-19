@@ -1,10 +1,10 @@
-from .general_layers import ConvBlock, UpsampleBlock
-
 from torch import nn
 
+from .general_layers import ConvBlock, UpsampleBlock
+
+
 class DownBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels.
@@ -21,20 +21,18 @@ class DownBlock(nn.Module):
         jump = kwargs.get("jump", 2)
 
         # The initial layer of the jump loop
-        init_layer = ConvBlock(in_channels, out_channels, 
-                               *args, **kwargs)
-        
+        init_layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
+
         layers.append(init_layer)
 
         # Append convolutional blocks if
         # jump is greater than 1
         for _ in range(jump - 1):
-            layer = ConvBlock(out_channels, out_channels, 
-                              *args, **kwargs)
+            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
             layers.append(layer)
 
         self.down_block = nn.Sequential(*layers)
-    
+
     def forward(self, x):
         """
         The forward method
@@ -43,9 +41,9 @@ class DownBlock(nn.Module):
         """
         return self.down_block(x)
 
+
 class UpBlock(nn.Module):
-    def __init__(self, in_channels, out_channels,
-                 *args, **kwargs):
+    def __init__(self, in_channels, out_channels, *args, **kwargs):
         """
         Initializer method
         :param in_channels: The number of in channels
@@ -62,18 +60,16 @@ class UpBlock(nn.Module):
         self.upsample = UpsampleBlock(*args, **kwargs)
 
         # The first convolutional layer
-        layer = ConvBlock(in_channels, out_channels, 
-                          *args, **kwargs)
+        layer = ConvBlock(in_channels, out_channels, *args, **kwargs)
         layers.append(layer)
 
         # Append convolutional blocks
         # if jump is greater than 1
         for _ in range(jump - 1):
-            layer = ConvBlock(out_channels, out_channels, 
-                              *args, **kwargs)
+            layer = ConvBlock(out_channels, out_channels, *args, **kwargs)
             layers.append(layer)
         self.conv_block = nn.Sequential(*layers)
-    
+
     def forward(self, x):
         """
         The forward method

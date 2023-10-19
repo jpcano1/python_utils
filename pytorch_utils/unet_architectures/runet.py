@@ -3,9 +3,18 @@ from torch import nn
 from .general_layers import ConvBlock
 from .layers import RecurrentDownBlock, RecurrentUpBlock
 
+
 class RecurrentUNet(nn.Module):
-    def __init__(self, in_channels, out_channels, init_filters, 
-                 depth, output_activation=nn.Sigmoid, *args, **kwargs):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        init_filters,
+        depth,
+        output_activation=nn.Sigmoid,
+        *args,
+        **kwargs,
+    ):
         """
         The unet method for generic creation
         :param in_channels: The number of in channels
@@ -19,7 +28,7 @@ class RecurrentUNet(nn.Module):
 
         # Depth must be greater than one
         assert depth > 1, f"Depth must be greater than one"
-        
+
         # Down and up blocks
         down_blocks = []
         up_blocks = []
@@ -27,18 +36,15 @@ class RecurrentUNet(nn.Module):
         # Keyword arguments
         pool_size = kwargs.get("pool_size", 2)
         pool_stride = kwargs.get("pool_stride", 2)
-        
+
         # Initial Layer
-        self.init_layer = ConvBlock(in_channels, init_filters, 
-                                    *args, **kwargs)
+        self.init_layer = ConvBlock(in_channels, init_filters, *args, **kwargs)
 
         # Begin the loop
         current_filters = init_filters
 
         # The first down block
-        down_block = RecurrentDownBlock(current_filters, 
-                                        current_filters * 2,
-                                        *args, **kwargs)
+        down_block = RecurrentDownBlock(current_filters, current_filters * 2, *args, **kwargs)
         down_blocks.append(down_block)
         current_filters *= 2
 
@@ -49,9 +55,7 @@ class RecurrentUNet(nn.Module):
             down_blocks.append(layer)
 
             # Create the down block
-            down_block = RecurrentDownBlock(current_filters, 
-                                            current_filters * 2, 
-                                            *args, **kwargs)
+            down_block = RecurrentDownBlock(current_filters, current_filters * 2, *args, **kwargs)
             down_blocks.append(down_block)
             current_filters *= 2
 
@@ -59,8 +63,7 @@ class RecurrentUNet(nn.Module):
         for _ in range(depth - 1):
             # Create the recurrent up block
             up_block = RecurrentUpBlock(
-                current_filters + current_filters // 2,
-                current_filters // 2, *args, **kwargs
+                current_filters + current_filters // 2, current_filters // 2, *args, **kwargs
             )
             up_blocks.append(up_block)
             current_filters //= 2
@@ -71,11 +74,14 @@ class RecurrentUNet(nn.Module):
 
         # Final layer
         self.final_layer = ConvBlock(
-            current_filters, out_channels, padding=0, 
-            activation=output_activation, kernel_size=1,
-            bn=True
+            current_filters,
+            out_channels,
+            padding=0,
+            activation=output_activation,
+            kernel_size=1,
+            bn=True,
         )
-        
+
     def forward(self, x):
         """
         The forward method
@@ -84,7 +90,7 @@ class RecurrentUNet(nn.Module):
         the convolutional block
         """
         x = self.init_layer(x)
-        
+
         down_blocks = []
 
         # Begin to forward pass the x tensor down
@@ -98,5 +104,5 @@ class RecurrentUNet(nn.Module):
         for idx, block in enumerate(self.up_blocks):
             idx_block = -(idx + 2)
             x = block(down_blocks[idx_block], x)
-        
+
         return self.final_layer(x)

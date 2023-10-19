@@ -1,29 +1,27 @@
-from sklearn.metrics.pairwise import euclidean_distances, manhattan_distances
-from sklearn.metrics import recall_score, precision_score, f1_score, make_scorer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.metrics import (precision_score, recall_score)
+import numpy as np
+import os
+import pandas as pd
+from skimage import color, feature, io, morphology
 from sklearn.cluster import KMeans
-
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import f1_score, make_scorer, precision_score, recall_score
+from sklearn.metrics.pairwise import euclidean_distances, manhattan_distances
+from sklearn.svm import SVC
 from tqdm.auto import tqdm
 
-import numpy as np
-import pandas as pd
-
-from skimage import io, color, morphology, feature
-import os
 
 def preprocesamiento(img, selem):
     img = morphology.opening(img, selem)
     return img
+
 
 class DataGenerator:
     """
     Clase que genera un lector de datos para las imágenes de entrenamiento,
     prueba y validación
     """
-    def __init__(self, data_dirs, grayscale=True, preprocessing=False,
-                 selem=None):
+
+    def __init__(self, data_dirs, grayscale=True, preprocessing=False, selem=None):
         """
         Función de inicialización de la clase
         :param grayscale: Indica que las imágenes se carguen en escala de grises.
@@ -39,20 +37,23 @@ class DataGenerator:
             "MildDemented": 0,
             "ModerateDemented": 0,
             "NonDemented": 1,
-            "VeryMildDemented": 2
+            "VeryMildDemented": 2,
         }
+
     def __len__(self):
         """
         Función que entrega el tamaño de la lista.
         :return: El tamaño de la lista
         """
         return len(self.data_dirs)
+
     def size(self):
         """
         Función que entrega el tamaño de la lista
         :return: Tamaño de la lista
         """
         return len(self)
+
     def __getitem__(self, idx):
         """
         Función que entrega el elemento en el índice idx
@@ -70,6 +71,7 @@ class DataGenerator:
         label = self.label_map[label]
         return img, label
 
+
 def intensity_histogram(image, bins):
     """
     Función que genera el histograma de intensidades para una imagen en
@@ -78,7 +80,8 @@ def intensity_histogram(image, bins):
     :param bins: La cantidad de bins que se usan en la imagen
     :return: El histograma de la imagen
     """
-    return np.histogram(image,bins=bins, density=True)[0]
+    return np.histogram(image, bins=bins, density=True)[0]
+
 
 def validation_histograms(train, val, bins):
     """
@@ -89,12 +92,7 @@ def validation_histograms(train, val, bins):
     :param bins: La cantidad de bins en el histograma
     :return: Las métricas de evaluación del método con SVM y RF
     """
-    final_data={
-        "Clasificador":[],
-        "Precisión":[],
-        "Cobertura":[],
-        "F-Medida":[]
-    }
+    final_data = {"Clasificador": [], "Precisión": [], "Cobertura": [], "F-Medida": []}
     features = []
     labels = []
     for X, y in train:
@@ -103,7 +101,7 @@ def validation_histograms(train, val, bins):
         labels.append(y)
     forest_clf = RandomForestClassifier().fit(features, labels)
     svm_clf = SVC().fit(features, labels)
-    features =[]
+    features = []
     labels = []
     for X, y in val:
         ft = intensity_histogram(X, bins)
@@ -111,21 +109,16 @@ def validation_histograms(train, val, bins):
         labels.append(y)
     y_pred = forest_clf.predict(features)
     final_data["Clasificador"].append("Random Forest")
-    final_data["Cobertura"].append(recall_score(labels, y_pred, 
-                                                average="weighted"))
-    final_data["Precisión"].append(precision_score(labels, y_pred,  
-                                                   average="weighted"))
-    final_data["F-Medida"].append(f1_score(labels, y_pred, 
-                                           average="weighted"))
+    final_data["Cobertura"].append(recall_score(labels, y_pred, average="weighted"))
+    final_data["Precisión"].append(precision_score(labels, y_pred, average="weighted"))
+    final_data["F-Medida"].append(f1_score(labels, y_pred, average="weighted"))
     y_pred = svm_clf.predict(features)
     final_data["Clasificador"].append("Support Vector Machine")
-    final_data["Cobertura"].append(recall_score(labels, y_pred,
-                                                average="weighted"))
-    final_data["Precisión"].append(precision_score(labels, y_pred,
-                                                   average="weighted"))
-    final_data["F-Medida"].append(f1_score(labels, y_pred,
-                                           average="weighted"))
+    final_data["Cobertura"].append(recall_score(labels, y_pred, average="weighted"))
+    final_data["Precisión"].append(precision_score(labels, y_pred, average="weighted"))
+    final_data["F-Medida"].append(f1_score(labels, y_pred, average="weighted"))
     return final_data
+
 
 def generate_hog(generator, params):
     """
@@ -144,6 +137,7 @@ def generate_hog(generator, params):
         index += 1
     return np.array(hog), labels
 
+
 def hog_descriptor(train_generator, val_generator, params, rf=True):
     """
     Función que evalua el descriptor HoG con los dos clasificadores
@@ -155,9 +149,12 @@ def hog_descriptor(train_generator, val_generator, params, rf=True):
     :return: Las métricas del modelo
     """
     results = {
-        "Pixeles por Celda": [], "Orientaciones": [], 
-        "Clasificador": [], "Precisión": [], 
-        "Cobertura": [], "F-Medida": []
+        "Pixeles por Celda": [],
+        "Orientaciones": [],
+        "Clasificador": [],
+        "Precisión": [],
+        "Cobertura": [],
+        "F-Medida": [],
     }
 
     for param in tqdm(params):
@@ -172,7 +169,7 @@ def hog_descriptor(train_generator, val_generator, params, rf=True):
             clf = SVC().fit(train_hog, train_labels)
             print("SVM Entrenado")
             results["Clasificador"].append("Support Vector Machine")
-        
+
         del train_hog, train_labels
 
         val_hog, val_labels = generate_hog(val_generator, param)
@@ -184,15 +181,22 @@ def hog_descriptor(train_generator, val_generator, params, rf=True):
 
         results["Cobertura"].append(recall_score(val_labels, y_pred, average="weighted"))
         results["Precisión"].append(precision_score(val_labels, y_pred, average="weighted"))
-        results["F-Medida"].append(f1_score(val_labels, y_pred, average="weighted"))        
-        
+        results["F-Medida"].append(f1_score(val_labels, y_pred, average="weighted"))
+
         del clf, y_pred
         del val_hog, val_labels
     return pd.DataFrame(results)
 
-def train_descriptor(train_data, train_labels, val_data, val_labels, 
-                     params=None, descriptor_name=None, 
-                     estimator=None):
+
+def train_descriptor(
+    train_data,
+    train_labels,
+    val_data,
+    val_labels,
+    params=None,
+    descriptor_name=None,
+    estimator=None,
+):
     """
     Método que genera un modelo con HoG y un clasificador (RF o SVM) variando los
     parámetros del clasificador
@@ -206,9 +210,12 @@ def train_descriptor(train_data, train_labels, val_data, val_labels,
     :return: Tabla con los datos de métricas
     """
     results = {
-        "N Estimadores": [], "Criterio": [],
-        "Precisión": [], "Cobertura": [],
-        "F-medida": [], "Descriptor": []
+        "N Estimadores": [],
+        "Criterio": [],
+        "Precisión": [],
+        "Cobertura": [],
+        "F-medida": [],
+        "Descriptor": [],
     }
     for param in tqdm(params):
         clf = estimator(**param)
@@ -218,7 +225,7 @@ def train_descriptor(train_data, train_labels, val_data, val_labels,
 
         y_pred = clf.predict(val_data)
 
-        results["Precisión"].append(precision_score(val_labels,y_pred, average="weighted"))
+        results["Precisión"].append(precision_score(val_labels, y_pred, average="weighted"))
         results["Cobertura"].append(recall_score(val_labels, y_pred, average="weighted"))
         results["F-medida"].append(f1_score(val_labels, y_pred, average="weighted"))
         results["Descriptor"].append(descriptor_name)
@@ -226,9 +233,16 @@ def train_descriptor(train_data, train_labels, val_data, val_labels,
         del y_pred, clf
     return pd.DataFrame(results)
 
-def train_descriptor_svm(train_data, train_labels, val_data, val_labels, 
-                     params=None, descriptor_name=None, 
-                     estimator=None):
+
+def train_descriptor_svm(
+    train_data,
+    train_labels,
+    val_data,
+    val_labels,
+    params=None,
+    descriptor_name=None,
+    estimator=None,
+):
     """
     Función que genera los resultados con la variación de parámetros para SVM
     :param train_data: Conjunto de imágenes con el descriptor aplicado de entrenamiento
@@ -241,9 +255,12 @@ def train_descriptor_svm(train_data, train_labels, val_data, val_labels,
     :return: Métricas para el modelo
     """
     results = {
-        "Kernel": [], "C": [],
-        "Precisión": [], "Cobertura": [],
-        "F-medida": [], "Descriptor": []
+        "Kernel": [],
+        "C": [],
+        "Precisión": [],
+        "Cobertura": [],
+        "F-medida": [],
+        "Descriptor": [],
     }
     for param in tqdm(params):
         clf = estimator(**param)
@@ -253,13 +270,14 @@ def train_descriptor_svm(train_data, train_labels, val_data, val_labels,
 
         y_pred = clf.predict(val_data)
 
-        results["Precisión"].append(precision_score(val_labels,y_pred, average="weighted"))
+        results["Precisión"].append(precision_score(val_labels, y_pred, average="weighted"))
         results["Cobertura"].append(recall_score(val_labels, y_pred, average="weighted"))
         results["F-medida"].append(f1_score(val_labels, y_pred, average="weighted"))
         results["Descriptor"].append(descriptor_name)
 
         del y_pred, clf
     return pd.DataFrame(results)
+
 
 def lbp(img, p, r):
     """
@@ -273,6 +291,7 @@ def lbp(img, p, r):
     n_bins = int(im.max() + 1)
     return np.histogram(im, bins=n_bins, density=True, range=(0, n_bins))[0]
 
+
 def validation_lbp(train, val, p, r):
     """
     Función que evalua el modelo de LBP
@@ -282,12 +301,7 @@ def validation_lbp(train, val, p, r):
     :param r: Radio para LBP
     :return: Las métricas de evalkuación de LBP con SVM y RF
     """
-    final_data={
-        "Clasificador":[],
-        "Precisión":[],
-        "Cobertura":[],
-        "F-Medida":[]
-    }
+    final_data = {"Clasificador": [], "Precisión": [], "Cobertura": [], "F-Medida": []}
     features = []
     labels = []
     for X, y in tqdm(train):
@@ -296,26 +310,20 @@ def validation_lbp(train, val, p, r):
         labels.append(y)
     forest_clf = RandomForestClassifier().fit(features, labels)
     svm_clf = SVC().fit(features, labels)
-    features=[]
-    labels=[]
+    features = []
+    labels = []
     for X, y in tqdm(val):
         ft = lbp(X, p, r)
         features.append(ft)
         labels.append(y)
     y_pred = forest_clf.predict(features)
     final_data["Clasificador"].append("Random Forest")
-    final_data["Cobertura"].append(recall_score(labels, y_pred, 
-                                                average="weighted"))
-    final_data["Precisión"].append(precision_score(labels, y_pred,  
-                                                   average="weighted"))
-    final_data["F-Medida"].append(f1_score(labels, y_pred, 
-                                           average="weighted"))
+    final_data["Cobertura"].append(recall_score(labels, y_pred, average="weighted"))
+    final_data["Precisión"].append(precision_score(labels, y_pred, average="weighted"))
+    final_data["F-Medida"].append(f1_score(labels, y_pred, average="weighted"))
     y_pred = svm_clf.predict(features)
     final_data["Clasificador"].append("Support Vector Machine")
-    final_data["Cobertura"].append(recall_score(labels, y_pred,
-                                                average="weighted"))
-    final_data["Precisión"].append(precision_score(labels, y_pred,
-                                                   average="weighted"))
-    final_data["F-Medida"].append(f1_score(labels, y_pred,
-                                           average="weighted"))
+    final_data["Cobertura"].append(recall_score(labels, y_pred, average="weighted"))
+    final_data["Precisión"].append(precision_score(labels, y_pred, average="weighted"))
+    final_data["F-Medida"].append(f1_score(labels, y_pred, average="weighted"))
     return final_data

@@ -1,9 +1,21 @@
 from torch import nn
 
+
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=3, 
-                 stride=1, padding=1, padding_mode="zeros", bias=True,
-                 bn=True, activation=None, *args, **kwargs):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size=3,
+        stride=1,
+        padding=1,
+        padding_mode="zeros",
+        bias=True,
+        bn=True,
+        activation=None,
+        *args,
+        **kwargs,
+    ):
         """
         Initializer method
         :param in_channels: The number of in channels
@@ -23,20 +35,22 @@ class ConvBlock(nn.Module):
         layers = []
 
         # Conv Layer
-        conv_layer = nn.Conv2d(in_channels=in_channels, 
-                               out_channels=out_channels, 
-                               kernel_size=kernel_size, 
-                               stride=stride, bias=bias, 
-                               padding_mode=padding_mode, 
-                               padding=padding)
+        conv_layer = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            bias=bias,
+            padding_mode=padding_mode,
+            padding=padding,
+        )
         layers.append(conv_layer)
 
         # Batch Normalization Layer
         if bn:
             if kwargs.get("bn_params"):
                 assert isinstance(kwargs.get("bn_params"), dict)
-                bn_layer = nn.BatchNorm2d(out_channels, 
-                                          **kwargs.get("bn_params"))
+                bn_layer = nn.BatchNorm2d(out_channels, **kwargs.get("bn_params"))
             else:
                 bn_layer = nn.BatchNorm2d(out_channels)
             layers.append(bn_layer)
@@ -49,7 +63,7 @@ class ConvBlock(nn.Module):
             else:
                 activation = activation()
             layers.append(activation)
-            
+
         self.conv_block = nn.Sequential(*layers)
         del layers
 
@@ -61,9 +75,9 @@ class ConvBlock(nn.Module):
         """
         return self.conv_block(x)
 
+
 class UpsampleBlock(nn.Module):
-    def __init__(self, scale_factor=2, mode="bilinear", 
-                 *args, **kwargs):
+    def __init__(self, scale_factor=2, mode="bilinear", *args, **kwargs):
         """
         Initializer method
         :param scale_factor: The factor of upsampling
@@ -76,12 +90,12 @@ class UpsampleBlock(nn.Module):
 
         # Conditional modes
         if mode != "nearest":
-            self.upsample_layer = nn.Upsample(scale_factor=scale_factor, 
-                                              mode=mode, align_corners=True)
+            self.upsample_layer = nn.Upsample(
+                scale_factor=scale_factor, mode=mode, align_corners=True
+            )
         else:
-            self.upsample_layer = nn.Upsample(scale_factor=scale_factor,
-                                              mode=mode)
-            
+            self.upsample_layer = nn.Upsample(scale_factor=scale_factor, mode=mode)
+
     def forward(self, x):
         """
         The forward method

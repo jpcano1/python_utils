@@ -3,9 +3,18 @@ from torch import nn
 from .general_layers import ConvBlock
 from .layers import AttentionUpBlock, DownBlock
 
+
 class AttentionUNet(nn.Module):
-    def __init__(self, in_channels, out_channels, init_filters,
-                 depth, output_activation=nn.Sigmoid, *args, **kwargs):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        init_filters,
+        depth,
+        output_activation=nn.Sigmoid,
+        *args,
+        **kwargs,
+    ):
         """
         Initializer method
         :param in_channels: The number of in channels
@@ -27,12 +36,10 @@ class AttentionUNet(nn.Module):
         pool_size = kwargs.get("pool_size", 2)
         pool_stride = kwargs.get("pool_stride", 2)
 
-        self.init_layer = ConvBlock(in_channels, init_filters, 
-                                    *args, **kwargs)
+        self.init_layer = ConvBlock(in_channels, init_filters, *args, **kwargs)
         current_filters = init_filters
 
-        down_block = DownBlock(current_filters, current_filters * 2, 
-                               *args, **kwargs)
+        down_block = DownBlock(current_filters, current_filters * 2, *args, **kwargs)
         down_blocks.append(down_block)
         current_filters *= 2
 
@@ -41,15 +48,14 @@ class AttentionUNet(nn.Module):
             down_blocks.append(layer)
 
             # Create the down block
-            down_block = DownBlock(current_filters, 
-                                   current_filters * 2, *args,
-                                   **kwargs)
+            down_block = DownBlock(current_filters, current_filters * 2, *args, **kwargs)
             down_blocks.append(down_block)
             current_filters *= 2
 
         for _ in range(depth - 1):
-            up_block = AttentionUpBlock(current_filters, current_filters // 2, 
-                                        current_filters // 2, *args, **kwargs)
+            up_block = AttentionUpBlock(
+                current_filters, current_filters // 2, current_filters // 2, *args, **kwargs
+            )
             up_blocks.append(up_block)
             current_filters //= 2
 
@@ -57,8 +63,7 @@ class AttentionUNet(nn.Module):
         self.up_blocks = nn.ModuleList(up_blocks)
 
         self.final_layer = ConvBlock(
-            current_filters, out_channels, padding=0, 
-            activation=output_activation, kernel_size=1
+            current_filters, out_channels, padding=0, activation=output_activation, kernel_size=1
         )
 
     def forward(self, x):
